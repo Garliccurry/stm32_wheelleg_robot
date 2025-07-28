@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux_for_arm",
+            "includePath": [
+                "${workspaceFolder}/**",
+                // "${workspaceFolder}/BareMetal/Drivers/CMSIS/Device/ST/STM32F4xx/Include/",
+                // "${workspaceFolder}/BareMetal/Drivers/CMSIS/Include/",
+                "/usr/lib/gcc/**",
+                "/usr/include/**",
+                "/usr/bin/**"
+            ],
+            "defines": [
+                "STM32F407xx",
+                "USE_HAL_DRIVER",
+                "__ARM_ARCH_7EM__"
+            ],
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "intelliSenseMode": "linux-gcc-arm",
+            "cStandard": "c17",
+            "cppStandard": "c++20"
+        }
+    ],
+    "version": 4
+}
