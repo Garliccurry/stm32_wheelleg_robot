@@ -26,7 +26,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "battery.h"
+#include "foc.h"
+#include "SCSCL.h"
+#include "driver_mpu6050.h"
+#include "driver_as5600.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,7 +103,29 @@ int main(void)
     MX_USART2_UART_Init();
     MX_TIM5_Init();
     /* USER CODE BEGIN 2 */
+    Motor_TypeDef motor_L, motor_R;
+    uint8_t MpuRawData[10], AsRawDataL[2], AsRawDataR[2];
+    int16_t acc[3], gyro_y, gyro_z;
+    uint16_t pos_l, pos_r;
+    AS5600_Data AS_L, AS_R;
+    I2C_Device *AS5600_L, *AS5600_R;
+    float ang_roll, ang_pitch, ang_l, ang_r, rot_l, rot_r, vel_l, vel_r, gyr_y, gyr_z;
+    int Lpos_l = -1, Lpos_r = -1;
+    float error_stand, pid_stand, Kp_s = -0.65, Kd_s = -0.00;
+    int count = 0;
+    LPF_TypeDef lpf_gyr_y;
 
+    vBattery_Init();
+    vMPU6050_Init();
+    vAS5600_Init();
+    AS5600_DataInit(&AS_L, &AS_R);
+    AS5600_L = xAS5600_GetHandle(1);
+    AS5600_R = xAS5600_GetHandle(2);
+    vFOC_MoterInit(&motor_L, &motor_R, &htim4, &htim3, AS5600_L, AS5600_R);
+
+    vLPF_Init(&lpf_gyr_y, 0.1);
+
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, g_rx_buf, RX_BUF_SIZE);
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -107,7 +133,47 @@ int main(void)
     while (1)
     {
         /* USER CODE END WHILE */
+        vUart_ParseCommand();
 
+        vMPU6050_ReadData(MpuRawData);
+        acc[0] = MpuRawData[0] << 8 | MpuRawData[1];
+        acc[1] = MpuRawData[2] << 8 | MpuRawData[3];
+        acc[2] = MpuRawData[4] << 8 | MpuRawData[5];
+        gyro_y = MpuRawData[6] << 8 | MpuRawData[7];
+        gyro_z = MpuRawData[8] << 8 | MpuRawData[9];
+        gyr_y = gyro_y / 512.0f;
+        gyr_y = fLowPassFilter(&lpf_gyr_y, gyr_y);
+        vMPU6050_ParseData(acc, &ang_roll, &ang_pitch);
+
+        xAS5600_ReadData(AS5600_L, AsRawDataL);
+        xAS5600_ReadData(AS5600_R, AsRawDataR);
+        pos_l = AsRawDataL[0] << 8 | AsRawDataL[1];
+        pos_r = AsRawDataR[0] << 8 | AsRawDataR[1];
+        vAS5600_ParseData(&AS_L, pos_l, &ang_l, &rot_l, &vel_l);
+        vAS5600_ParseData(&AS_R, pos_r, &ang_r, &rot_r, &vel_r);
+
+        if (wheel_run != 0)
+        {
+            //            printf("%f, %f\r\n", ang_l, vel_l);
+            //            vFOC_VelocityCloseloop(&motor_L, g_vel, ang_l, vel_l);
+            //            vFOC_VelocityCloseloop(&motor_R, -g_vel, ang_r, vel_r);
+            error_stand = ang_roll_zero - ang_roll;
+            pid_stand = Kp_s * error_stand + Kd_s * gyr_y;
+            printf("%f \r\n", pid_stand);
+            vFOC_WheelBalance(&motor_L, pid_stand, ang_l);
+            vFOC_WheelBalance(&motor_R, pid_stand, ang_r);
+        }
+
+        if (count == 1000)
+        {
+            //            Lpos_l = ReadPos(1);
+            //            Lpos_r = ReadPos(2);
+            WritePos(1, 2048 + g_hight, 0, 1500);
+            WritePos(2, 2048 - g_hight, 0, 1500);
+            printf("x\n");
+            count = 0;
+        }
+        count++;
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
