@@ -8,6 +8,26 @@
             "type": "shell",
             "command": "echo ${workspaceFolder}",
             "problemMatcher": []
+        },
+        {
+            "label": "OpenOCD Flash STM32 BareMetal",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f", "interface/stlink.cfg",
+                "-f", "target/stm32f4x.cfg",
+                "-c", "program BareMetal/Objects/bare_metal.elf verify reset exit"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            }
         }
     ]
 }
