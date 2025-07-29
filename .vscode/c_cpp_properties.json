@@ -4,8 +4,9 @@
             "name": "Linux_for_arm",
             "includePath": [
                 "${workspaceFolder}/**",
-                // "${workspaceFolder}/BareMetal/Drivers/CMSIS/Device/ST/STM32F4xx/Include/",
-                // "${workspaceFolder}/BareMetal/Drivers/CMSIS/Include/",
+                "${workspaceFolder}/BareMetal/MyDrivers",
+                "${workspaceFolder}/BareMetal/MyLib",
+                "${workspaceFolder}/BareMetal/MyApp",
                 "/usr/lib/gcc/**",
                 "/usr/include/**",
                 "/usr/bin/**"
@@ -16,6 +17,12 @@
                 "__ARM_ARCH_7EM__"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mcpu=cortex-m4",
+                "-mfpu=fpv4-sp-d16",
+                // "-mfloat-abi=hard",
+                "-mthumb"
+            ],
             "intelliSenseMode": "linux-gcc-arm",
             "cStandard": "c17",
             "cppStandard": "c++20"

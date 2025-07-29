@@ -65,7 +65,22 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
-Core/Src/system_stm32f4xx.c  
+third/SCSLib/SCSerail.c \
+third/SCSLib/SMS_STS.c \
+third/SCSLib/SCSCL.c \
+third/SCSLib/SCS.c \
+Core/Src/system_stm32f4xx.c \
+MyDrivers/driver_mpu6050.c \
+MyDrivers/driver_as5600.c \
+MyDrivers/driver_led.c \
+MyLib/cirbuf.c \
+MyLib/device.c \
+MyLib/filter.c \
+MyLib/pid.c \
+MyApp/battery.c \
+MyApp/shared.c \
+MyApp/foc.c
+
 
 # ASM sources
 ASM_SOURCES =  \
@@ -129,7 +144,12 @@ C_INCLUDES =  \
 -IDrivers/STM32F4xx_HAL_Driver/Inc \
 -IDrivers/STM32F4xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
--IDrivers/CMSIS/Include
+-IDrivers/CMSIS/Include \
+-Ithird/SCSLib \
+-IMyDrivers \
+-IMyLib \
+-IMyApp \
+
 
 
 # compile gcc flags
