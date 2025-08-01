@@ -4,17 +4,16 @@
 #include <stdint.h>
 
 #define CB_TypeDef CirBuf_HandleTypeDef
-#define pCB_TypeDef pCirBuf_HandleTypeDef
 
 typedef struct CirBuf {
-	uint32_t r;
-	uint32_t w;
-	uint32_t len;
-	uint8_t *buf;
-}CirBuf_HandleTypeDef, *pCirBuf_HandleTypeDef;
+    uint32_t r;
+    uint32_t w;
+    uint32_t len;
+    uint8_t *buf;
+} CirBuf_HandleTypeDef;
 
-void CirBuf_Init(pCB_TypeDef pCB, uint32_t len, uint8_t *buf);
-int CirBuf_Read(pCB_TypeDef pCB, uint8_t *pVal);
-int CirBuf_Write(pCB_TypeDef pCB, uint8_t val);
+void CirBuf_Init(CB_TypeDef *CB_handle, uint32_t len, uint8_t *buf);
+int  CirBuf_Read(CB_TypeDef *CB_handle, uint8_t *pVal);
+int  CirBuf_Write(CB_TypeDef *CB_handle, uint8_t val);
 
 #endif /* _CIRBUF_H */

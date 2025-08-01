@@ -2,36 +2,43 @@
 #include <math.h>
 #include <stdlib.h>
 #include "i2c.h"
-#include "usart.h"
+#include "log.h"
 #include "foc.h"
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c3;
-static I2C_Device AS5600_L, AS5600_R;
-static LPF_TypeDef lpf_l, lpf_r;
+
+static I2C_Device  s_AS5600_L, s_AS5600_R;
+static LPF_TypeDef s_lpf_l, s_lpf_r;
 
 I2C_Device *AS5600_GetHandle(int i)
 {
     if (i == 1)
-        return &AS5600_L;
+        return &s_AS5600_L;
     if (i == 2)
-        return &AS5600_R;
+        return &s_AS5600_R;
     else
         return NULL;
 }
 
 void AS5600_Init(void)
 {
-    Device_I2C_Register(&AS5600_L, &hi2c1, AS5600_ADDRESS, I2C_DEVICE_AS5600);
-    Device_I2C_Register(&AS5600_R, &hi2c3, AS5600_ADDRESS, I2C_DEVICE_AS5600);
-    printf("as5600 init succ\r\n");
+    HAL_StatusTypeDef status = HAL_OK;
+    status |= Device_I2C_Register(&s_AS5600_L, &hi2c1, AS5600_ADDRESS, I2C_DEVICE_AS5600);
+    status |= Device_I2C_Register(&s_AS5600_R, &hi2c3, AS5600_ADDRESS, I2C_DEVICE_AS5600);
+    if (status == HAL_OK) {
+        LOG_INFO("as5600 initialization successful!");
+    } else {
+        LOG_INFO("as5600 initialization failed!");
+    }
+    HAL_Delay(10);
 }
 
 void AS5600_DataInit(AS5600_Data *data_l, AS5600_Data *data_r)
 {
-    data_l->ltf = &lpf_l;
-    data_r->ltf = &lpf_r;
-    LPF_Init(&lpf_l, 0.5);
-    LPF_Init(&lpf_r, 0.5);
+    data_l->ltf = &s_lpf_l;
+    data_r->ltf = &s_lpf_r;
+    LPF_Init(&s_lpf_l, 0, 0.5);
+    LPF_Init(&s_lpf_r, 0, 0.5);
 }
 
 void AS5600_ReadData(I2C_Device *dev, uint8_t *asdata)
@@ -42,15 +49,14 @@ void AS5600_ReadData(I2C_Device *dev, uint8_t *asdata)
                               AS5600_REGISTER_RAW_ANGLE_HIGH,
                               I2C_MEMADD_SIZE_8BIT, asdata, 2,
                               AS5600_TIMEOUT);
-    if (status != HAL_OK)
-    {
+    if (status != HAL_OK) {
         printf("AS %d\r\n", status);
     }
 }
 
 float AS5600_GetAng(uint16_t raw_data)
 {
-    return (float)raw_data * _PI / 2048.f; // ���ػ���ֵ0-2PI
+    return (float)raw_data * _PI / 2048.f;
 }
 
 static void AS5600_AngleUpdate(AS5600_Data *asdata, float angle, float *rot)
@@ -58,8 +64,7 @@ static void AS5600_AngleUpdate(AS5600_Data *asdata, float angle, float *rot)
     float angle_d;
 
     angle_d = angle - asdata->angle_now;
-    if (fabs(angle_d) > (0.8f * 6.28318530718f))
-    {
+    if (fabs(angle_d) > (0.8f * 6.28318530718f)) {
         asdata->rota_now += (angle_d > 0) ? -1 : 1;
         *rot = asdata->rota_now;
     }
@@ -83,5 +88,5 @@ void AS5600_ParseData(AS5600_Data *asdata, uint16_t raw_angle, float *angle, flo
     float vel = AS5600_GetVel(asdata);
     *velocity = LowPassFilter(asdata->ltf, vel);
     AS5600_AngleUpdate(asdata, *angle, rotation);
-    //    printf("%f, %f\n",vel,*velocity);
+    // LOG_DEBUG("%f, %f\n", vel, *velocity);
 }

@@ -1,77 +1,38 @@
 #include <stdint.h>
 #include "cirbuf.h"
-/**********************************************************************
- * 函数名称：    CirBuf_Init
- * 功能描述：    环形缓冲区初始化函数
- * 输入参数：    pCB     环形缓冲区指针
- *              len     buffer长度
- *              buf     数据缓冲buffer
- * 输出参数：    无
- * 返 回 值：    无
- * 修改日期        版本号     修改人	      修改内容
- * -----------------------------------------------
- * 2025/02/08	     V1.0	  Garlic      创建
- ***********************************************************************/
-void CirBuf_Init(pCB_TypeDef pCB, uint32_t len, uint8_t *buf)
+void CirBuf_Init(CB_TypeDef *CB_handle, uint32_t len, uint8_t *buf)
 {
-	pCB->r = pCB->w = 0;
-	pCB->len = len;
-	pCB->buf = buf;
+    CB_handle->r = CB_handle->w = 0;
+    CB_handle->len = len;
+    CB_handle->buf = buf;
 }
 
-/**********************************************************************
- * 函数名称：    CirBuf_Write
- * 功能描述：    写入环形缓冲区数据
- * 输入参数：    pCB     环形缓冲区指针
- *              val     写入数据
- * 输出参数：    无
- * 返 回 值：   0 - 成功, 其他值 - 失败，buffer满
- * 修改日期        版本号     修改人	      修改内容
- * -----------------------------------------------
- * 2025/02/08	     V1.0	  Garlic      创建
- ***********************************************************************/
-int CirBuf_Write(pCB_TypeDef pCB, uint8_t val)
+int CirBuf_Write(CB_TypeDef *CB_handle, uint8_t val)
 {
-	uint32_t next_w;
-	
-    next_w = ((pCB->w + 1) != pCB->len) ? (pCB->w + 1) : 0;
-    
-	if (next_w != pCB->r)
-	{
-		pCB->buf[pCB->w] = val;
-		pCB->w = next_w;
-		return 0;
-	}
-	else
-	{
-		return -1;
-	}
+    uint32_t next_w;
+
+    next_w = ((CB_handle->w + 1) != CB_handle->len) ? (CB_handle->w + 1) : 0;
+
+    if (next_w != CB_handle->r) {
+        CB_handle->buf[CB_handle->w] = val;
+        CB_handle->w = next_w;
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
-/**********************************************************************
- * 函数名称：    CirBuf_Read
- * 功能描述：    读取环形缓冲区数据
- * 输入参数：    pCB     环形缓冲区指针
- * 输出参数：    pVal    输出指针
- * 返 回 值：   0 - 成功, 其他值 - 失败，buffer空
- * 修改日期        版本号     修改人	      修改内容
- * -----------------------------------------------
- * 2025/02/08	     V1.0	  Garlic      创建
- ***********************************************************************/
-int CirBuf_Read(pCB_TypeDef pCB, uint8_t *pVal)
+int CirBuf_Read(CB_TypeDef *CB_handle, uint8_t *pVal)
 {
-	if (pCB->r != pCB->w)
-	{
-		*pVal = pCB->buf[pCB->r];
-		
-		pCB->r++;
-		
-		if (pCB->r == pCB->len)
-			pCB->r = 0;
-		return 0;
-	}
-	else
-	{
-		return -1;
-	}
+    if (CB_handle->r != CB_handle->w) {
+        *pVal = CB_handle->buf[CB_handle->r];
+
+        CB_handle->r++;
+
+        if (CB_handle->r == CB_handle->len)
+            CB_handle->r = 0;
+        return 0;
+    } else {
+        return -1;
+    }
 }

@@ -10,7 +10,13 @@
         "battery.h": "c",
         "tim.h": "c",
         "adc.h": "c",
-        "stm32f4xx_hal.h": "c"
+        "stm32f4xx_hal.h": "c",
+        "filter.h": "c",
+        "cmath": "c",
+        "gpio.h": "c",
+        "driver_led.h": "c",
+        "cirbuf.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.formatting": "clangFormat"
 }

@@ -72,7 +72,6 @@ void SystemClock_Config(void);
  */
 int main(void)
 {
-
     /* USER CODE BEGIN 1 */
 
     /* USER CODE END 1 */
@@ -105,42 +104,40 @@ int main(void)
     MX_TIM5_Init();
     /* USER CODE BEGIN 2 */
     Motor_TypeDef motor_L, motor_R;
-    uint8_t MpuRawData[10], AsRawDataL[2], AsRawDataR[2];
-    int16_t acc[3], gyro_y, gyro_z;
-    uint16_t pos_l, pos_r;
-    AS5600_Data AS_L, AS_R;
-    I2C_Device *AS5600_L, *AS5600_R;
-    float ang_roll, ang_pitch, ang_l, ang_r, rot_l, rot_r, vel_l, vel_r, gyr_y, gyr_z;
-    int Lpos_l = -1, Lpos_r = -1;
-    float error_stand, pid_stand, Kp_s = -0.65, Kd_s = -0.00;
-    int count = 0;
-    LPF_TypeDef lpf_gyr_y;
+    uint8_t       MpuRawData[10], AsRawDataL[2], AsRawDataR[2];
+    int16_t       acc[3], gyro_y, gyro_z;
+    uint16_t      pos_l, pos_r;
+    AS5600_Data   AS_L, AS_R;
+    I2C_Device   *AS5600_L, *AS5600_R;
+    float         ang_roll, ang_pitch, ang_l, ang_r, rot_l, rot_r, vel_l, vel_r, gyr_y, gyr_z;
+    int           Lpos_l = -1, Lpos_r = -1;
+    float         error_stand, pid_stand, Kp_s = -0.65, Kd_s = -0.00;
+    int           count = 0;
+    LPF_TypeDef   lpf_gyr_y;
 
     log_RegisterOutput(Usart_LogPrint);
-    log_SetFmt(LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP | LOG_FMT_FUNC_LINE);
-    Test_LogFunctions();
-    Test_LogRunTimeDebug();
+    log_SetFmt(LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP);
+
     Battery_Init();
-    vMPU6050_Init();
+    MPU6050_Init();
     AS5600_Init();
     AS5600_DataInit(&AS_L, &AS_R);
     AS5600_L = AS5600_GetHandle(1);
     AS5600_R = AS5600_GetHandle(2);
     FOC_MoterInit(&motor_L, &motor_R, &htim4, &htim3, AS5600_L, AS5600_R);
 
-    LPF_Init(&lpf_gyr_y, 0.1);
+    LPF_Init(&lpf_gyr_y, 0, 0.1);
 
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, g_rx_buf, RX_BUF_SIZE);
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-    while (1)
-    {
+    while (1) {
         /* USER CODE END WHILE */
         vUart_ParseCommand();
 
-        vMPU6050_ReadData(MpuRawData);
+        MPU6050_ReadData(MpuRawData);
         acc[0] = MpuRawData[0] << 8 | MpuRawData[1];
         acc[1] = MpuRawData[2] << 8 | MpuRawData[3];
         acc[2] = MpuRawData[4] << 8 | MpuRawData[5];
@@ -148,7 +145,7 @@ int main(void)
         gyro_z = MpuRawData[8] << 8 | MpuRawData[9];
         gyr_y = gyro_y / 512.0f;
         gyr_y = LowPassFilter(&lpf_gyr_y, gyr_y);
-        vMPU6050_ParseData(acc, &ang_roll, &ang_pitch);
+        MPU6050_ParseData(acc, &ang_roll, &ang_pitch);
 
         AS5600_ReadData(AS5600_L, AsRawDataL);
         AS5600_ReadData(AS5600_R, AsRawDataR);
@@ -157,8 +154,7 @@ int main(void)
         AS5600_ParseData(&AS_L, pos_l, &ang_l, &rot_l, &vel_l);
         AS5600_ParseData(&AS_R, pos_r, &ang_r, &rot_r, &vel_r);
 
-        if (wheel_run != 0)
-        {
+        if (wheel_run != 0) {
             //            printf("%f, %f\r\n", ang_l, vel_l);
             //            FOC_VelocityCloseloop(&motor_L, g_vel, ang_l, vel_l);
             //            FOC_VelocityCloseloop(&motor_R, -g_vel, ang_r, vel_r);
@@ -169,8 +165,7 @@ int main(void)
             FOC_WheelBalance(&motor_R, pid_stand, ang_r);
         }
 
-        if (count == 1000)
-        {
+        if (count == 1000) {
             //            Lpos_l = ReadPos(1);
             //            Lpos_r = ReadPos(2);
             // WritePos(1, 2048 + g_hight, 0, 1500);
@@ -210,8 +205,7 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.PLL.PLLN = 168;
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
     RCC_OscInitStruct.PLL.PLLQ = 4;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-    {
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         Error_Handler();
     }
 
@@ -223,8 +217,7 @@ void SystemClock_Config(void)
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-    {
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK) {
         Error_Handler();
     }
 }
@@ -242,8 +235,7 @@ void Error_Handler(void)
     /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
-    while (1)
-    {
+    while (1) {
     }
     /* USER CODE END Error_Handler_Debug */
 }

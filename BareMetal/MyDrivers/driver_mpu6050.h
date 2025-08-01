@@ -6,46 +6,46 @@
 #include "main.h"
 #include "device.h"
 //****************************************
-// ¶¨ÒåMPU6050ÄÚ²¿µØÖ·
+// ï¿½ï¿½ï¿½ï¿½MPU6050ï¿½Ú²ï¿½ï¿½ï¿½Ö·
 //****************************************
-#define	MPU6050_SMPLRT_DIV		0x19  // ÍÓÂÝÒÇ²ÉÑùÂÊ£¬µäÐÍÖµ£º0x07(125Hz)
-#define	MPU6050_CONFIG			0x1A  // µÍÍ¨ÂË²¨ÆµÂÊ£¬µäÐÍÖµ£º0x06(5Hz)
-#define	MPU6050_GYRO_CONFIG		0x1B  // ÍÓÂÝÒÇ×Ô¼ì¼°²âÁ¿·¶Î§£¬µäÐÍÖµ£º0x18(²»×Ô¼ì£¬2000deg/s)
-#define	MPU6050_ACCEL_CONFIG	0x1C  // ¼ÓËÙ¼Æ×Ô¼ì¡¢²âÁ¿·¶Î§¼°¸ßÍ¨ÂË²¨ÆµÂÊ£¬µäÐÍÖµ£º0x01(²»×Ô¼ì£¬2G£¬5Hz)
+#define MPU6050_SMPLRT_DIV   0x19 // ï¿½ï¿½ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½Ê£ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0x07(125Hz)
+#define MPU6050_CONFIG       0x1A // ï¿½ï¿½Í¨ï¿½Ë²ï¿½Æµï¿½Ê£ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0x06(5Hz)
+#define MPU6050_GYRO_CONFIG  0x1B // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ì¼°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0x18(ï¿½ï¿½ï¿½Ô¼ì£¬2000deg/s)
+#define MPU6050_ACCEL_CONFIG 0x1C // ï¿½ï¿½ï¿½Ù¼ï¿½ï¿½Ô¼ì¡¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î§ï¿½ï¿½ï¿½ï¿½Í¨ï¿½Ë²ï¿½Æµï¿½Ê£ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0x01(ï¿½ï¿½ï¿½Ô¼ì£¬2Gï¿½ï¿½5Hz)
 
-#define	MPU6050_ACCEL_XOUT_H	0x3B
-#define	MPU6050_ACCEL_XOUT_L	0x3C
-#define	MPU6050_ACCEL_YOUT_H	0x3D
-#define	MPU6050_ACCEL_YOUT_L	0x3E
-#define	MPU6050_ACCEL_ZOUT_H	0x3F
-#define	MPU6050_ACCEL_ZOUT_L	0x40
-#define	MPU6050_TEMP_OUT_H		0x41
-#define	MPU6050_TEMP_OUT_L		0x42
-#define	MPU6050_GYRO_XOUT_H		0x43
-#define	MPU6050_GYRO_XOUT_L		0x44
-#define	MPU6050_GYRO_YOUT_H		0x45
-#define	MPU6050_GYRO_YOUT_L		0x46
-#define	MPU6050_GYRO_ZOUT_H		0x47
-#define	MPU6050_GYRO_ZOUT_L		0x48
+#define MPU6050_ACCEL_XOUT_H 0x3B
+#define MPU6050_ACCEL_XOUT_L 0x3C
+#define MPU6050_ACCEL_YOUT_H 0x3D
+#define MPU6050_ACCEL_YOUT_L 0x3E
+#define MPU6050_ACCEL_ZOUT_H 0x3F
+#define MPU6050_ACCEL_ZOUT_L 0x40
+#define MPU6050_TEMP_OUT_H   0x41
+#define MPU6050_TEMP_OUT_L   0x42
+#define MPU6050_GYRO_XOUT_H  0x43
+#define MPU6050_GYRO_XOUT_L  0x44
+#define MPU6050_GYRO_YOUT_H  0x45
+#define MPU6050_GYRO_YOUT_L  0x46
+#define MPU6050_GYRO_ZOUT_H  0x47
+#define MPU6050_GYRO_ZOUT_L  0x48
 
-#define	MPU6050_PWR_MGMT_1		0x6B //µçÔ´¹ÜÀí£¬µäÐÍÖµ£º0x00(Õý³£ÆôÓÃ)
-#define	MPU6050_PWR_MGMT_2		0x6C
-#define	MPU6050_WHO_AM_I		0x75 //IICµØÖ·¼Ä´æÆ÷(Ä¬ÈÏÊýÖµ0x68£¬Ö»¶Á)
+#define MPU6050_PWR_MGMT_1 0x6B //ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0x00(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+#define MPU6050_PWR_MGMT_2 0x6C
+#define MPU6050_WHO_AM_I   0x75 // IICï¿½ï¿½Ö·ï¿½Ä´ï¿½ï¿½ï¿½(Ä¬ï¿½ï¿½ï¿½ï¿½Öµ0x68ï¿½ï¿½Ö»ï¿½ï¿½)
 
-#define MPU6050_ADDR            0xD2
-#define MPU6050_TIMEOUT         500
+#define MPU6050_ADDR    0xD2
+#define MPU6050_TIMEOUT 500
 
-/* ´«¸ÐÆ÷Êý¾ÝÐÞÕýÖµ£¨Ïû³ýÐ¾Æ¬¹Ì¶¨Îó²î£¬¸ù¾ÝÓ²¼þ½øÐÐµ÷Õû£© */
-#define MPU6050_X_ACCEL_OFFSET	(0) 
-#define MPU6050_Y_ACCEL_OFFSET 	(0)
-#define MPU6050_Z_ACCEL_OFFSET 	(0) 
-#define MPU6050_X_GYRO_OFFSET 	(0)
-#define MPU6050_Y_GYRO_OFFSET 	(0)
-#define MPU6050_Z_GYRO_OFFSET 	(0)
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾Æ¬ï¿½Ì¶ï¿½ï¿½ï¿½î£¬ï¿½ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½ */
+#define MPU6050_X_ACCEL_OFFSET (0)
+#define MPU6050_Y_ACCEL_OFFSET (0)
+#define MPU6050_Z_ACCEL_OFFSET (0)
+#define MPU6050_X_GYRO_OFFSET  (0)
+#define MPU6050_Y_GYRO_OFFSET  (0)
+#define MPU6050_Z_GYRO_OFFSET  (0)
 
-//#define MPU6050_X_ACCEL_OFFSET	(-17) 
+//#define MPU6050_X_ACCEL_OFFSET	(-17)
 //#define MPU6050_Y_ACCEL_OFFSET 	(13)
-//#define MPU6050_Z_ACCEL_OFFSET 	(0) 
+//#define MPU6050_Z_ACCEL_OFFSET 	(0)
 //#define MPU6050_X_GYRO_OFFSET 	(16)
 //#define MPU6050_Y_GYRO_OFFSET 	(-3)
 //#define MPU6050_Z_GYRO_OFFSET 	(0)
@@ -53,14 +53,12 @@
 #define MPU6050_QUEUE_LEN 10
 
 struct mpu6050_data {
-	int32_t angle_x;
+    int32_t angle_x;
 };
-I2C_Device* xMPU6050_GetHandle(void);
-void vMPU6050_Init(void);
-int lMPU6050_GetID(void);
-void vMPU6050_ReadData(uint8_t* data);
-void vMPU6050_ParseData(int16_t* data, float *Ang_x, float *Ang_y);
-void vMPU6050_Task(void *params);
+I2C_Device *MPU6050_GetHandle(void);
+void        MPU6050_Init(void);
+int         MPU6050_GetID(void);
+void        MPU6050_ReadData(uint8_t *data);
+void        MPU6050_ParseData(int16_t *data, float *Ang_x, float *Ang_y);
 
 #endif /* __DRIVER_OLED_H */
-

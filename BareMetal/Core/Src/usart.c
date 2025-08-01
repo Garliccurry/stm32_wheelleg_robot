@@ -31,7 +31,6 @@ UART_HandleTypeDef huart2;
 
 void MX_USART1_UART_Init(void)
 {
-
     /* USER CODE BEGIN USART1_Init 0 */
 
     /* USER CODE END USART1_Init 0 */
@@ -47,8 +46,7 @@ void MX_USART1_UART_Init(void)
     huart1.Init.Mode = UART_MODE_TX_RX;
     huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-    if (HAL_UART_Init(&huart1) != HAL_OK)
-    {
+    if (HAL_UART_Init(&huart1) != HAL_OK) {
         Error_Handler();
     }
     /* USER CODE BEGIN USART1_Init 2 */
@@ -59,7 +57,6 @@ void MX_USART1_UART_Init(void)
 
 void MX_USART2_UART_Init(void)
 {
-
     /* USER CODE BEGIN USART2_Init 0 */
 
     /* USER CODE END USART2_Init 0 */
@@ -75,8 +72,7 @@ void MX_USART2_UART_Init(void)
     huart2.Init.Mode = UART_MODE_TX_RX;
     huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-    if (HAL_UART_Init(&huart2) != HAL_OK)
-    {
+    if (HAL_UART_Init(&huart2) != HAL_OK) {
         Error_Handler();
     }
     /* USER CODE BEGIN USART2_Init 2 */
@@ -86,10 +82,8 @@ void MX_USART2_UART_Init(void)
 
 void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
 {
-
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    if (uartHandle->Instance == USART1)
-    {
+    if (uartHandle->Instance == USART1) {
         /* USER CODE BEGIN USART1_MspInit 0 */
 
         /* USER CODE END USART1_MspInit 0 */
@@ -114,9 +108,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
         /* USER CODE BEGIN USART1_MspInit 1 */
 
         /* USER CODE END USART1_MspInit 1 */
-    }
-    else if (uartHandle->Instance == USART2)
-    {
+    } else if (uartHandle->Instance == USART2) {
         /* USER CODE BEGIN USART2_MspInit 0 */
 
         /* USER CODE END USART2_MspInit 0 */
@@ -143,9 +135,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 {
-
-    if (uartHandle->Instance == USART1)
-    {
+    if (uartHandle->Instance == USART1) {
         /* USER CODE BEGIN USART1_MspDeInit 0 */
 
         /* USER CODE END USART1_MspDeInit 0 */
@@ -163,9 +153,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
         /* USER CODE BEGIN USART1_MspDeInit 1 */
 
         /* USER CODE END USART1_MspDeInit 1 */
-    }
-    else if (uartHandle->Instance == USART2)
-    {
+    } else if (uartHandle->Instance == USART2) {
         /* USER CODE BEGIN USART2_MspDeInit 0 */
 
         /* USER CODE END USART2_MspDeInit 0 */
@@ -185,7 +173,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-uint8_t g_rx_buf[RX_BUF_SIZE];
+uint8_t        g_rx_buf[RX_BUF_SIZE];
 static uint8_t g_command[RX_BUF_SIZE];
 #ifdef __GNUC__
 /* With GCC, small printf (option LD Linker->Libraries->Small printf
@@ -206,8 +194,7 @@ int _write(int file, char *ptr, int len)
 {
     int DataIdx;
 
-    for (DataIdx = 0; DataIdx < len; DataIdx++)
-    {
+    for (DataIdx = 0; DataIdx < len; DataIdx++) {
         __io_putchar(*ptr++);
     }
     return len;
@@ -215,12 +202,9 @@ int _write(int file, char *ptr, int len)
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    if (huart->Instance == USART1)
-    {
-        if (Size == RX_BUF_SIZE)
-        {
-            for (int i = 0; i < RX_BUF_SIZE; i++)
-            {
+    if (huart->Instance == USART1) {
+        if (Size == RX_BUF_SIZE) {
+            for (int i = 0; i < RX_BUF_SIZE; i++) {
                 g_command[i] = g_rx_buf[i];
             }
             g_flag_usartrec = 1;
@@ -231,8 +215,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (huart->Instance == USART1)
-    {
+    if (huart->Instance == USART1) {
     }
 }
 
@@ -243,34 +226,22 @@ void Usart_LogPrint(uint8_t *ch, uint16_t len)
 
 void vUart_ParseCommand(void)
 {
-    if (g_flag_usartrec == 1)
-    {
-        if (g_command[0] == 0x31)
-        {
+    if (g_flag_usartrec == 1) {
+        if (g_command[0] == 0x31) {
             pos_left += 6;
-        }
-        else if (g_command[3] == 0x32)
-        {
+        } else if (g_command[3] == 0x32) {
             g_vel += 10.f;
             printf("%f\r\n", g_vel);
-        }
-        else if (g_command[3] == 0x33)
-        {
+        } else if (g_command[3] == 0x33) {
             g_vel -= 10.f;
             printf("%f\r\n", g_vel);
-        }
-        else if (g_command[3] == 0x34)
-        {
+        } else if (g_command[3] == 0x34) {
             g_hight += 10;
             printf("%d\r\n", g_hight);
-        }
-        else if (g_command[3] == 0x35)
-        {
+        } else if (g_command[3] == 0x35) {
             g_hight -= 10;
             printf("%d\r\n", g_hight);
-        }
-        else if (g_command[3] == 0x36)
-        {
+        } else if (g_command[3] == 0x36) {
             wheel_run = ~wheel_run;
         }
         g_flag_usartrec = 0;
@@ -284,12 +255,9 @@ void vFTUart_Send(uint8_t *nDat, int nLen)
 
 int lFTUart_Read(uint8_t *nDat, int nLen)
 {
-    if (HAL_OK != HAL_UART_Receive(&huart2, nDat, nLen, 100))
-    {
+    if (HAL_OK != HAL_UART_Receive(&huart2, nDat, nLen, 100)) {
         return 0;
-    }
-    else
-    {
+    } else {
         return nLen;
     }
 }
