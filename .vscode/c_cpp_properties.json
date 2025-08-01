@@ -4,6 +4,7 @@
             "name": "Linux_for_arm",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/BareMetal/Core/Inc",
                 "${workspaceFolder}/BareMetal/MyDrivers",
                 "${workspaceFolder}/BareMetal/MyLib",
                 "${workspaceFolder}/BareMetal/MyApp",
