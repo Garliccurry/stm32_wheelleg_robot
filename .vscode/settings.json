@@ -7,7 +7,10 @@
         "stdarg.h": "c",
         "stdint.h": "c",
         "log.h": "c",
-        "battery.h": "c"
+        "battery.h": "c",
+        "tim.h": "c",
+        "adc.h": "c",
+        "stm32f4xx_hal.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
 }

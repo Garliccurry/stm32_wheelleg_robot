@@ -36,19 +36,19 @@ typedef enum
 /* 日志宏定义 */
 
 #if LOG_DEBUG_EN
-#define LOG_DEBUG(fmt, ...) log(LOG_LEVEL_DEBUG, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_DEBUG(fmt, ...) log_Print(LOG_LEVEL_DEBUG, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define LOG_DEBUG(fmt, ...)
 #endif
 
 #if LOG_INFO_EN
-#define LOG_INFO(fmt, ...) log(LOG_LEVEL_INFO, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_INFO(fmt, ...) log_Print(LOG_LEVEL_INFO, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define LOG_INFO(fmt, ...)
 #endif
 
 #if LOG_ERROR_EN
-#define LOG_ERROR(fmt, ...) log(LOG_LEVEL_ERROR, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_ERROR(fmt, ...) log_Print(LOG_LEVEL_ERROR, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define LOG_ERROR(fmt, ...)
 #endif
@@ -58,7 +58,7 @@ typedef void (*logOutputFunc)(uint8_t *data, uint16_t size);
 
 void log_RegisterOutput(logOutputFunc func);
 void log_SetFmt(uint32_t fmt);
-void log(uint32_t level, const char *func, uint32_t line, const char *fmt, ...);
+void log_Print(uint32_t level, const char *func, uint32_t line, const char *fmt, ...);
 void Test_LogFunctions(void);
 void Test_LogRunTimeDebug(void);
 #endif

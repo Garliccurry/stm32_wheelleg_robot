@@ -3,14 +3,14 @@
 /* 全局配置 */
 static uint32_t s_log_fmt = LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP | LOG_FMT_FUNC_LINE;
 static uint32_t s_log_level = CONFIG_LOG_DEF_LEVEL;
-static logOutputFunc log_output = NULL;
+static logOutputFunc s_log_output = NULL;
 
 static void Get_SystemTime(char *time_buf, uint16_t buf_size, uint16_t *ms);
 
 /* 注册输出函数（默认使用串口） */
 void log_RegisterOutput(logOutputFunc func)
 {
-    log_output = func ? func : Usart_LogPrint;
+    s_log_output = func ? func : Usart_LogPrint;
 }
 
 /* 设置日志格式 */
@@ -35,7 +35,7 @@ static void Get_SystemTime(char *time_buf, uint16_t buf_size, uint16_t *ms)
 }
 
 /* 核心日志函数 */
-void log(uint32_t level, const char *func, uint32_t line, const char *fmt, ...)
+void log_Print(uint32_t level, const char *func, uint32_t line, const char *fmt, ...)
 {
     /* 级别过滤 */
     if (level >= LOG_LEVEL_BOTTOM || level < s_log_level)
@@ -93,7 +93,7 @@ void log(uint32_t level, const char *func, uint32_t line, const char *fmt, ...)
     }
 
     /* 输出日志 */
-    log_output((uint8_t *)log_buf, (uint16_t)idx);
+    s_log_output((uint8_t *)log_buf, (uint16_t)idx);
 }
 
 void Test_LogFunctions(void)

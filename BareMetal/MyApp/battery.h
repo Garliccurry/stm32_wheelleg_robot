@@ -3,6 +3,5 @@
 
 #include "stm32f4xx_hal.h"
 
-void vBattery_Init(void);
-void vBattery_TimerCallback(void);
+void Battery_Init(void);
 #endif
