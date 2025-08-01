@@ -3,7 +3,11 @@
     "files.associations": {
         "main.h": "c",
         "driver_mpu6050.h": "c",
-        "usart.h": "c"
+        "usart.h": "c",
+        "stdarg.h": "c",
+        "stdint.h": "c",
+        "log.h": "c",
+        "battery.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
 }
