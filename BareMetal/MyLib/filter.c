@@ -1,9 +1,9 @@
 #include "filter.h"
 #include "usart.h"
 
-void LPF_Init(LPF_TypeDef *lpf, float a)
+void LPF_Init(LPF_TypeDef *lpf, float y_init, float alpha)
 {
-    lpf->alpha = a;
+    lpf->alpha = alpha;
     lpf->y_prev = 0;
 }
 
