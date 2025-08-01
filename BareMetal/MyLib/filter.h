@@ -4,14 +4,12 @@
 #include "main.h"
 typedef struct LPF_TypeDef
 {
-    float alpha;    //!< µÍÍ¨ÂË²¨±ÈÀý
-    float y_prev;   //!< ÉÏÒ»¸öÑ­»·ÖÐµÄ¹ýÂËºóµÄÖµ
-    
-}LPF_TypeDef;
+    float alpha;  //!< ï¿½ï¿½Í¨ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½
+    float y_prev; //!< ï¿½ï¿½Ò»ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ÐµÄ¹ï¿½ï¿½Ëºï¿½ï¿½Öµ
 
+} LPF_TypeDef;
 
-void vLPF_Init(LPF_TypeDef* lpf, float a);
-float fLowPassFilter(LPF_TypeDef* lpf, float x);
-
+void LPF_Init(LPF_TypeDef *lpf, float a);
+float LowPassFilter(LPF_TypeDef *lpf, float x);
 
 #endif

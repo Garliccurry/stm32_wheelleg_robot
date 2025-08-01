@@ -120,15 +120,15 @@ int main(void)
     log_SetFmt(LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP | LOG_FMT_FUNC_LINE);
     Test_LogFunctions();
     Test_LogRunTimeDebug();
-    vBattery_Init();
+    Battery_Init();
     vMPU6050_Init();
-    vAS5600_Init();
+    AS5600_Init();
     AS5600_DataInit(&AS_L, &AS_R);
-    AS5600_L = xAS5600_GetHandle(1);
-    AS5600_R = xAS5600_GetHandle(2);
-    vFOC_MoterInit(&motor_L, &motor_R, &htim4, &htim3, AS5600_L, AS5600_R);
+    AS5600_L = AS5600_GetHandle(1);
+    AS5600_R = AS5600_GetHandle(2);
+    FOC_MoterInit(&motor_L, &motor_R, &htim4, &htim3, AS5600_L, AS5600_R);
 
-    vLPF_Init(&lpf_gyr_y, 0.1);
+    LPF_Init(&lpf_gyr_y, 0.1);
 
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, g_rx_buf, RX_BUF_SIZE);
     /* USER CODE END 2 */
@@ -147,26 +147,26 @@ int main(void)
         gyro_y = MpuRawData[6] << 8 | MpuRawData[7];
         gyro_z = MpuRawData[8] << 8 | MpuRawData[9];
         gyr_y = gyro_y / 512.0f;
-        gyr_y = fLowPassFilter(&lpf_gyr_y, gyr_y);
+        gyr_y = LowPassFilter(&lpf_gyr_y, gyr_y);
         vMPU6050_ParseData(acc, &ang_roll, &ang_pitch);
 
-        xAS5600_ReadData(AS5600_L, AsRawDataL);
-        xAS5600_ReadData(AS5600_R, AsRawDataR);
+        AS5600_ReadData(AS5600_L, AsRawDataL);
+        AS5600_ReadData(AS5600_R, AsRawDataR);
         pos_l = AsRawDataL[0] << 8 | AsRawDataL[1];
         pos_r = AsRawDataR[0] << 8 | AsRawDataR[1];
-        vAS5600_ParseData(&AS_L, pos_l, &ang_l, &rot_l, &vel_l);
-        vAS5600_ParseData(&AS_R, pos_r, &ang_r, &rot_r, &vel_r);
+        AS5600_ParseData(&AS_L, pos_l, &ang_l, &rot_l, &vel_l);
+        AS5600_ParseData(&AS_R, pos_r, &ang_r, &rot_r, &vel_r);
 
         if (wheel_run != 0)
         {
             //            printf("%f, %f\r\n", ang_l, vel_l);
-            //            vFOC_VelocityCloseloop(&motor_L, g_vel, ang_l, vel_l);
-            //            vFOC_VelocityCloseloop(&motor_R, -g_vel, ang_r, vel_r);
+            //            FOC_VelocityCloseloop(&motor_L, g_vel, ang_l, vel_l);
+            //            FOC_VelocityCloseloop(&motor_R, -g_vel, ang_r, vel_r);
             error_stand = ang_roll_zero - ang_roll;
             pid_stand = Kp_s * error_stand + Kd_s * gyr_y;
             printf("%f \r\n", pid_stand);
-            vFOC_WheelBalance(&motor_L, pid_stand, ang_l);
-            vFOC_WheelBalance(&motor_R, pid_stand, ang_r);
+            FOC_WheelBalance(&motor_L, pid_stand, ang_l);
+            FOC_WheelBalance(&motor_R, pid_stand, ang_r);
         }
 
         if (count == 1000)

@@ -4,17 +4,17 @@
 #include "main.h"
 typedef struct PID_TypeDef
 {
-    float Kp; //!< ±ÈÀýÔöÒæ(P»·ÔöÒæ)
-    float Ki; //!< »ý·ÖÔöÒæ£¨I»·ÔöÒæ£©
-    float Kd; //!< Î¢·ÖÔöÒæ£¨D»·ÔöÒæ£©
-    float inte_pre; //!< ×îºóÒ»¸ö»ý·Ö·ÖÁ¿Öµ
-    float limit_inte; 
-    float limit_out; 
-    float error_pre; //!< ×îºóµÄ¸ú×ÙÎó²îÖµ
-    uint32_t time_pre; //!< ÉÏ´ÎÖ´ÐÐÊ±¼ä´Á
-}PID_TypeDef;
+    float Kp;       //!< ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(Pï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+    float Ki;       //!< ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ£¨Iï¿½ï¿½ï¿½ï¿½ï¿½æ£©
+    float Kd;       //!< Î¢ï¿½ï¿½ï¿½ï¿½ï¿½æ£¨Dï¿½ï¿½ï¿½ï¿½ï¿½æ£©
+    float inte_pre; //!< ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½Öµ
+    float limit_inte;
+    float limit_out;
+    float error_pre;   //!< ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+    uint32_t time_pre; //!< ï¿½Ï´ï¿½Ö´ï¿½ï¿½Ê±ï¿½ï¿½ï¿½
+} PID_TypeDef;
 
-void vPID_Init(PID_TypeDef* pid,int dir, float p, float i, float d, float l_o,float l_i);
-float fPID_PosController(PID_TypeDef* pid, float error);
-float fPID_IncController(PID_TypeDef* pid, float error);
+void PID_Init(PID_TypeDef *pid, int dir, float p, float i, float d, float l_o, float l_i);
+float PID_PosController(PID_TypeDef *pid, float error);
+float fPID_IncController(PID_TypeDef *pid, float error);
 #endif

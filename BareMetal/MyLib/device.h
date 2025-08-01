@@ -11,15 +11,15 @@ typedef enum
     I2C_DEVICE_BOTTOM
 } I2CDeviceType;
 
-// MPU6050ÌØÓÐÊý¾Ý½á¹¹
+// MPU6050ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½á¹¹
 typedef struct
 {
-    float roll;  // ¼ÆËãºóµÄ¹ö×ª½Ç
-    float pitch; // ¸©Ñö½Ç
-    float yaw;   // Æ«º½½Ç
+    float roll;  // ï¿½ï¿½ï¿½ï¿½ï¿½Ä¹ï¿½×ªï¿½ï¿½
+    float pitch; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    float yaw;   // Æ«ï¿½ï¿½ï¿½ï¿½
 } MPU6050_Data;
 
-// AS5600ÌØÓÐÊý¾Ý½á¹¹
+// AS5600ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½á¹¹
 typedef struct
 {
     float angle_pre;
@@ -30,15 +30,15 @@ typedef struct
     LPF_TypeDef *ltf;
 } AS5600_Data;
 
-// I2CÉè±¸Í¨ÓÃ½á¹¹Ìå
+// I2Cï¿½è±¸Í¨ï¿½Ã½á¹¹ï¿½ï¿½
 typedef struct
 {
-    I2C_HandleTypeDef *hi2c; // I2C¿ØÖÆÆ÷¾ä±ú
-    uint8_t dev_addr;        // Éè±¸µØÖ·
-    uint16_t dev_id;         // Éè±¸Ó²¼þID
-    I2CDeviceType dev_type;  // Éè±¸ÀàÐÍ±êÊ¶
+    I2C_HandleTypeDef *hi2c; // I2Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    uint8_t dev_addr;        // ï¿½è±¸ï¿½ï¿½Ö·
+    uint16_t dev_id;         // ï¿½è±¸Ó²ï¿½ï¿½ID
+    I2CDeviceType dev_type;  // ï¿½è±¸ï¿½ï¿½ï¿½Í±ï¿½Ê¶
 
 } I2C_Device;
 
-HAL_StatusTypeDef xI2CDevice_Register(I2C_Device *dev, I2C_HandleTypeDef *hi2c, uint8_t addr, I2CDeviceType type);
+HAL_StatusTypeDef Device_I2C_Register(I2C_Device *dev, I2C_HandleTypeDef *hi2c, uint8_t addr, I2CDeviceType type);
 #endif
