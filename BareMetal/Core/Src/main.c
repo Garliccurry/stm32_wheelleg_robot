@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "battery.h"
+#include "log.h"
 #include "foc.h"
 #include "SCSCL.h"
 #include "driver_mpu6050.h"
@@ -115,6 +116,10 @@ int main(void)
     int count = 0;
     LPF_TypeDef lpf_gyr_y;
 
+    log_RegisterOutput(Usart_LogPrint);
+    log_SetFmt(LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP | LOG_FMT_FUNC_LINE);
+    Test_LogFunctions();
+    Test_LogRunTimeDebug();
     vBattery_Init();
     vMPU6050_Init();
     vAS5600_Init();
@@ -168,9 +173,9 @@ int main(void)
         {
             //            Lpos_l = ReadPos(1);
             //            Lpos_r = ReadPos(2);
-            WritePos(1, 2048 + g_hight, 0, 1500);
-            WritePos(2, 2048 - g_hight, 0, 1500);
-            printf("x\n");
+            // WritePos(1, 2048 + g_hight, 0, 1500);
+            // WritePos(2, 2048 - g_hight, 0, 1500);
+            // printf("x\n");
             count = 0;
         }
         count++;
