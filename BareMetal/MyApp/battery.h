@@ -1,5 +1,5 @@
-#ifndef __BATTERY_H
-#define __BATTERY_H
+#ifndef __BATTERY_H__
+#define __BATTERY_H__
 
 #include "stm32f4xx_hal.h"
 

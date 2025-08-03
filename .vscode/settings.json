@@ -15,7 +15,9 @@
         "cmath": "c",
         "gpio.h": "c",
         "driver_led.h": "c",
-        "cirbuf.h": "c"
+        "cirbuf.h": "c",
+        "foc.h": "c",
+        "math.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.formatting": "clangFormat"

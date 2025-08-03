@@ -116,7 +116,7 @@ int main(void)
     LPF_TypeDef   lpf_gyr_y;
 
     log_RegisterOutput(Usart_LogPrint);
-    log_SetFmt(LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP);
+    log_SetFmt(0);
 
     Battery_Init();
     MPU6050_Init();
@@ -135,7 +135,7 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
-        vUart_ParseCommand();
+        Uart_ParseCommand();
 
         MPU6050_ReadData(MpuRawData);
         acc[0] = MpuRawData[0] << 8 | MpuRawData[1];
@@ -155,21 +155,26 @@ int main(void)
         AS5600_ParseData(&AS_R, pos_r, &ang_r, &rot_r, &vel_r);
 
         if (wheel_run != 0) {
-            //            printf("%f, %f\r\n", ang_l, vel_l);
-            //            FOC_VelocityCloseloop(&motor_L, g_vel, ang_l, vel_l);
-            //            FOC_VelocityCloseloop(&motor_R, -g_vel, ang_r, vel_r);
-            error_stand = ang_roll_zero - ang_roll;
-            pid_stand = Kp_s * error_stand + Kd_s * gyr_y;
-            printf("%f \r\n", pid_stand);
-            FOC_WheelBalance(&motor_L, pid_stand, ang_l);
-            FOC_WheelBalance(&motor_R, pid_stand, ang_r);
+            // printf("%f, %f\r\n", ang_l, vel_l);
+            // printf("%f\r\n", g_vel);
+            FOC_VelocityCloseloop(&motor_L, g_vel, ang_l, vel_l);
+            FOC_VelocityCloseloop(&motor_R, -g_vel, ang_r, vel_r);
+            // FOC_VelocityOpenLoop(&motor_L, g_vel);
+            //     error_stand = ang_roll_zero - ang_roll;
+            //     pid_stand = Kp_s * error_stand + Kd_s * gyr_y;
+            //     printf("%f \r\n", pid_stand);
+            //     FOC_WheelBalance(&motor_L, pid_stand, ang_l);
+            //     FOC_WheelBalance(&motor_R, pid_stand, ang_r);
+        } else {
+            MOTOR_L_DISABLE;
+            MOTOR_R_DISABLE;
         }
 
         if (count == 1000) {
             //            Lpos_l = ReadPos(1);
             //            Lpos_r = ReadPos(2);
             // WritePos(1, 2048 + g_hight, 0, 1500);
-            // WritePos(2, 2048 - g_hight, 0, 1500);
+            // WritePos(2, 2048 - g_hight, 0, 1500);1
             // printf("x\n");
             count = 0;
         }

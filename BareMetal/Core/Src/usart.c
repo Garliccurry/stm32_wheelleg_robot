@@ -224,7 +224,8 @@ void Usart_LogPrint(uint8_t *ch, uint16_t len)
     HAL_UART_Transmit(&huart1, ch, len, 100);
 }
 
-void vUart_ParseCommand(void)
+#include "foc.h"
+void Uart_ParseCommand(void)
 {
     if (g_flag_usartrec == 1) {
         if (g_command[0] == 0x31) {
@@ -243,6 +244,8 @@ void vUart_ParseCommand(void)
             printf("%d\r\n", g_hight);
         } else if (g_command[3] == 0x36) {
             wheel_run = ~wheel_run;
+            MOTOR_L_TOGGLE;
+            MOTOR_R_TOGGLE;
         }
         g_flag_usartrec = 0;
     }

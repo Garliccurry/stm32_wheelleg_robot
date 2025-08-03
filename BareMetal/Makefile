@@ -73,7 +73,6 @@ Core/Src/system_stm32f4xx.c \
 MyDrivers/driver_mpu6050.c \
 MyDrivers/driver_as5600.c \
 MyDrivers/driver_led.c \
-MyLib/cirbuf.c \
 MyLib/device.c \
 MyLib/filter.c \
 MyLib/pid.c \

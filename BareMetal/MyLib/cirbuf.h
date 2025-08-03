@@ -1,5 +1,5 @@
-#ifndef _CIRBUF_H
-#define _CIRBUF_H
+#ifndef _CIRBUF_H__
+#define _CIRBUF_H__
 
 #include <stdint.h>
 
