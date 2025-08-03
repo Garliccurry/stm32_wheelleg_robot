@@ -1,5 +1,5 @@
-#ifndef __FILTER_H
-#define __FILTER_H
+#ifndef __FILTER_H__
+#define __FILTER_H__
 
 #include "main.h"
 typedef struct LPF_TypeDef {

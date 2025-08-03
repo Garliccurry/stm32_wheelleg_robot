@@ -65,24 +65,43 @@ static float Closeloop_ElecAngle(Motor_TypeDef *m, float angle)
     return NormalizeAngle((float)(m->DIR * m->PP) * angle - (m->Z_ElecAngle));
 }
 
-void FOC_AlignSensor(Motor_TypeDef *m, float _PP, float _DIR, float _PWR)
+void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr)
 {
-    m->PP = _PP;
-    m->DIR = _DIR;
-    m->Vpwr = _PWR;
+    m->PP = PP;
+    m->DIR = DIR;
+    m->Vpwr = Vpwr;
     m->Z_ElecAngle = Closeloop_ElecAngle(m, 0);
 }
 
 // int i = 0;
 
+// void SetTorque(Motor_TypeDef *m, float Uq, float angle_el)
+// {
+//     static uint8_t raw_angle[2];
+//     AS5600_ReadData(m->as_dev, raw_angle);
+
+//     uint16_t angle = raw_angle[0] << 8 | raw_angle[1];
+//     angle_el = AS5600_GetAng(angle);
+//     angle_el = Closeloop_ElecAngle(m, angle_el + m->Z_ElecAngle);
+//     float Ualpha = -Uq * sin(angle_el);
+//     float Ubeta = Uq * cos(angle_el);
+
+//     float Ua = Ualpha + m->Vpwr / 2;
+//     float Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + m->Vpwr / 2;
+//     float Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + m->Vpwr / 2;
+
+//     float dc_a = constrain(Ua / m->Vpwr, 0.0f, 1.0f);
+//     float dc_b = constrain(Ub / m->Vpwr, 0.0f, 1.0f);
+//     float dc_c = constrain(Uc / m->Vpwr, 0.0f, 1.0f);
+
+//     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_1, dc_a * 99);
+//     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_2, dc_b * 99);
+//     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_3, dc_c * 99);
+// }
+
 void SetTorque(Motor_TypeDef *m, float Uq, float angle_el)
 {
-    static uint8_t raw_angle[2];
-    AS5600_ReadData(m->as_dev, raw_angle);
-
-    uint16_t angle = raw_angle[0] << 8 | raw_angle[1];
-    angle_el = AS5600_GetAng(angle);
-    angle_el = Closeloop_ElecAngle(m, angle_el + m->Z_ElecAngle);
+    angle_el = NormalizeAngle(angle_el + m->Z_ElecAngle);
     float Ualpha = -Uq * sin(angle_el);
     float Ubeta = Uq * cos(angle_el);
 
@@ -98,26 +117,6 @@ void SetTorque(Motor_TypeDef *m, float Uq, float angle_el)
     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_2, dc_b * 99);
     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_3, dc_c * 99);
 }
-
-// void SetTorque(Motor_TypeDef *m, float Uq, float angle_el) {
-//
-//
-//     angle_el = NormalizeAngle(angle_el + m->Z_ElecAngle);
-//     float Ualpha =  -Uq*sin(angle_el);
-//     float Ubeta =   Uq*cos(angle_el);
-
-//    float Ua = Ualpha + m->Vpwr/2;
-//    float Ub = (sqrt(3)*Ubeta-Ualpha)/2 + m->Vpwr/2;
-//    float Uc = (-Ualpha-sqrt(3)*Ubeta)/2 + m->Vpwr/2;
-
-//    float dc_a = constrain(Ua / m->Vpwr, 0.0f , 1.0f );
-//    float dc_b = constrain(Ub / m->Vpwr, 0.0f , 1.0f );
-//    float dc_c = constrain(Uc / m->Vpwr, 0.0f , 1.0f );
-//
-//    __HAL_TIM_SetCompare(m->htim,TIM_CHANNEL_1,dc_a*99);
-//    __HAL_TIM_SetCompare(m->htim,TIM_CHANNEL_2,dc_b*99);
-//    __HAL_TIM_SetCompare(m->htim,TIM_CHANNEL_3,dc_c*99);
-//}
 
 void FOC_VelocityCloseloop(Motor_TypeDef *m, float target_v, float angle, float vel)
 {
@@ -149,6 +148,7 @@ void FOC_VelocityOpenLoop(Motor_TypeDef *m, float target_v)
     float Ts = 0.001;
 
     s_shaft_angle = s_shaft_angle + target_v * Ts;
+    // LOG_DEBUG("%f\r\n", s_shaft_angle);
     float Uq = V_POWER / 2;
     SetTorque(m, Uq, Openloop_ElecAngle(m, s_shaft_angle));
 }

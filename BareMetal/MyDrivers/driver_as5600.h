@@ -1,5 +1,5 @@
-#ifndef __DRIVER_AS5600_H
-#define __DRIVER_AS5600_H
+#ifndef __DRIVER_AS5600_H__
+#define __DRIVER_AS5600_H__
 
 /**********************    INCLUDE DIRECTIVES    ***********************/
 #include "main.h"

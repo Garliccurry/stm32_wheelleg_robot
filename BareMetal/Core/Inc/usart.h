@@ -22,39 +22,38 @@
 #define __USART_H__
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-    /* USER CODE BEGIN Includes */
+/* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
 #include "shared.h"
-    /* USER CODE END Includes */
+/* USER CODE END Includes */
 
-    extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart1;
 
-    extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
 #define RX_BUF_SIZE 4
-    /* USER CODE END Private defines */
+/* USER CODE END Private defines */
 
-    void MX_USART1_UART_Init(void);
-    void MX_USART2_UART_Init(void);
+void MX_USART1_UART_Init(void);
+void MX_USART2_UART_Init(void);
 
-    /* USER CODE BEGIN Prototypes */
-    extern uint8_t g_rx_buf[RX_BUF_SIZE];
+/* USER CODE BEGIN Prototypes */
+extern uint8_t g_rx_buf[RX_BUF_SIZE];
 
-    void Usart_LogPrint(uint8_t *ch, uint16_t len);
-    void vUart_ParseCommand(void);
-    void vFTUart_Send(uint8_t *nDat, int nLen);
-    int lFTUart_Read(uint8_t *nDat, int nLen);
-    void vFTBus_Delay(void);
-    /* USER CODE END Prototypes */
+void Usart_LogPrint(uint8_t *ch, uint16_t len);
+void Uart_ParseCommand(void);
+void vFTUart_Send(uint8_t *nDat, int nLen);
+int  lFTUart_Read(uint8_t *nDat, int nLen);
+void vFTBus_Delay(void);
+/* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }

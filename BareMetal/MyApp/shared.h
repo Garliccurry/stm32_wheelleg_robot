@@ -1,5 +1,5 @@
-#ifndef __SHARED_H
-#define __SHARED_H
+#ifndef __SHARED_H__
+#define __SHARED_H__
 
 /**********************    INCLUDE DIRECTIVES    *************************/
 #include "main.h"

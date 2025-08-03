@@ -54,7 +54,7 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
                    I2C_Device        *as_dev_L,
                    I2C_Device        *as_dev_R);
 void SetTorque(Motor_TypeDef *m, float Uq, float angle_el);
-void FOC_AlignSensor(Motor_TypeDef *m, float _PP, float _DIR, float _PWR);
+void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr);
 void FOC_VelocityCloseloop(Motor_TypeDef *m, float target_v, float angle, float vel);
 void FOC_WheelBalance(Motor_TypeDef *m, float error, float angle);
 void FOC_PositionCloseloop(Motor_TypeDef *m, float motor_target, float angle, float rotation);
