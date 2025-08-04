@@ -4,13 +4,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "[编译代码]Compile all STM32 project",
+            "label": "[1.0.0-编译代码]Compile all STM32 project",
             "type": "shell",
             "command": "make",
             "problemMatcher": []
         },
         {
-            "label": "[烧录代码]OpenOCD Flash STM32 BareMetal",
+            "label": "[2.0.0-烧录代码]OpenOCD Flash STM32 BareMetal",
             "type": "shell",
             "command": "openocd",
             "args": [
