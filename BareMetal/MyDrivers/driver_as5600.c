@@ -41,7 +41,7 @@ void AS5600_DataInit(AS5600_Data *data_l, AS5600_Data *data_r)
     LPF_Init(&s_lpf_r, 0, 0.5);
 }
 
-void AS5600_ReadData(I2C_Device *dev, uint8_t *asdata)
+void AS5600_ReadData(I2C_Device *dev, uint8_t *asdata) // 2字节100us
 {
     HAL_StatusTypeDef status = HAL_OK;
 

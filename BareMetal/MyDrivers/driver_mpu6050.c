@@ -38,7 +38,7 @@ int MPU6050_GetID(void)
         return -1;
 }
 
-void MPU6050_ReadData(uint8_t *data)
+void MPU6050_ReadData(uint8_t *data) // 10字节380us
 {
     HAL_StatusTypeDef status = HAL_OK;
     if (data) {
