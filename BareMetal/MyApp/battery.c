@@ -23,7 +23,7 @@ static void Battery_TimerCallback(void)
 {
     uint32_t   ADC_Result = 0;
     float      Voltage = 0;
-    static int i;
+    static int i = 0;
     HAL_ADC_Start(&hadc1);
 
     if (HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK) {

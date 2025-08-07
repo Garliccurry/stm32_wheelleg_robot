@@ -11,6 +11,10 @@ extern int   pos_left;
 extern float g_vel;
 extern int   g_hight;
 extern int   wheel_run;
+
+extern int i2cl;
+extern int i2cr;
+extern int i2cm;
 /***********************    FUNCTION PROTOTYPES    ***********************/
 void vSharedResources_Init(void);
 #endif

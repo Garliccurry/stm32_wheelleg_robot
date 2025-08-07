@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "tim.h"
 #include "usart.h"
@@ -94,6 +95,7 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
+    MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_ADC1_Init();
     MX_I2C1_Init();
@@ -102,6 +104,7 @@ int main(void)
     MX_TIM4_Init();
     MX_USART2_UART_Init();
     MX_TIM5_Init();
+    MX_TIM2_Init();
     /* USER CODE BEGIN 2 */
     Motor_TypeDef motor_L, motor_R;
     uint8_t       MpuRawData[10], AsRawDataL[2], AsRawDataR[2];
@@ -114,6 +117,7 @@ int main(void)
     float         error_stand, pid_stand, Kp_s = -0.65, Kd_s = -0.00;
     int           count = 0;
     LPF_TypeDef   lpf_gyr_y;
+    uint8_t       raw_angle[2];
 
     log_RegisterOutput(Usart_LogPrint);
     log_SetFmt(0);
@@ -135,50 +139,7 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
-        Uart_ParseCommand();
 
-        MPU6050_ReadData(MpuRawData);
-        acc[0] = MpuRawData[0] << 8 | MpuRawData[1];
-        acc[1] = MpuRawData[2] << 8 | MpuRawData[3];
-        acc[2] = MpuRawData[4] << 8 | MpuRawData[5];
-        gyro_y = MpuRawData[6] << 8 | MpuRawData[7];
-        gyro_z = MpuRawData[8] << 8 | MpuRawData[9];
-        gyr_y = gyro_y / 512.0f;
-        gyr_y = LowPassFilter(&lpf_gyr_y, gyr_y);
-        MPU6050_ParseData(acc, &ang_roll, &ang_pitch);
-
-        AS5600_ReadData(AS5600_L, AsRawDataL);
-        AS5600_ReadData(AS5600_R, AsRawDataR);
-        pos_l = AsRawDataL[0] << 8 | AsRawDataL[1];
-        pos_r = AsRawDataR[0] << 8 | AsRawDataR[1];
-        AS5600_ParseData(&AS_L, pos_l, &ang_l, &rot_l, &vel_l);
-        AS5600_ParseData(&AS_R, pos_r, &ang_r, &rot_r, &vel_r);
-
-        if (wheel_run != 0) {
-            // printf("%f, %f\r\n", ang_l, vel_l);
-            // printf("%f\r\n", g_vel);
-            FOC_VelocityCloseloop(&motor_L, g_vel, ang_l, vel_l);
-            FOC_VelocityCloseloop(&motor_R, -g_vel, ang_r, vel_r);
-            // FOC_VelocityOpenLoop(&motor_L, g_vel);
-            //     error_stand = ang_roll_zero - ang_roll;
-            //     pid_stand = Kp_s * error_stand + Kd_s * gyr_y;
-            //     printf("%f \r\n", pid_stand);
-            //     FOC_WheelBalance(&motor_L, pid_stand, ang_l);
-            //     FOC_WheelBalance(&motor_R, pid_stand, ang_r);
-        } else {
-            MOTOR_L_DISABLE;
-            MOTOR_R_DISABLE;
-        }
-
-        if (count == 1000) {
-            //            Lpos_l = ReadPos(1);
-            //            Lpos_r = ReadPos(2);
-            // WritePos(1, 2048 + g_hight, 0, 1500);
-            // WritePos(2, 2048 - g_hight, 0, 1500);1
-            // printf("x\n");
-            count = 0;
-        }
-        count++;
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
@@ -216,7 +177,8 @@ void SystemClock_Config(void)
 
     /** Initializes the CPU, AHB and APB buses clocks
      */
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+                                  | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;

@@ -26,6 +26,8 @@
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef  hdma_usart2_rx;
+DMA_HandleTypeDef  hdma_usart2_tx;
 
 /* USART1 init function */
 
@@ -103,7 +105,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
         /* USART1 interrupt Init */
-        HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+        HAL_NVIC_SetPriority(USART1_IRQn, 10, 0);
         HAL_NVIC_EnableIRQ(USART1_IRQn);
         /* USER CODE BEGIN USART1_MspInit 1 */
 
@@ -126,6 +128,41 @@ void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
         GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+        /* USART2 DMA Init */
+        /* USART2_RX Init */
+        hdma_usart2_rx.Instance = DMA1_Stream5;
+        hdma_usart2_rx.Init.Channel = DMA_CHANNEL_4;
+        hdma_usart2_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+        hdma_usart2_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+        hdma_usart2_rx.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_usart2_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        hdma_usart2_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+        hdma_usart2_rx.Init.Mode = DMA_NORMAL;
+        hdma_usart2_rx.Init.Priority = DMA_PRIORITY_LOW;
+        hdma_usart2_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        if (HAL_DMA_Init(&hdma_usart2_rx) != HAL_OK) {
+            Error_Handler();
+        }
+
+        __HAL_LINKDMA(uartHandle, hdmarx, hdma_usart2_rx);
+
+        /* USART2_TX Init */
+        hdma_usart2_tx.Instance = DMA1_Stream6;
+        hdma_usart2_tx.Init.Channel = DMA_CHANNEL_4;
+        hdma_usart2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+        hdma_usart2_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+        hdma_usart2_tx.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_usart2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        hdma_usart2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+        hdma_usart2_tx.Init.Mode = DMA_NORMAL;
+        hdma_usart2_tx.Init.Priority = DMA_PRIORITY_LOW;
+        hdma_usart2_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        if (HAL_DMA_Init(&hdma_usart2_tx) != HAL_OK) {
+            Error_Handler();
+        }
+
+        __HAL_LINKDMA(uartHandle, hdmatx, hdma_usart2_tx);
 
         /* USER CODE BEGIN USART2_MspInit 1 */
 
@@ -166,6 +203,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
         */
         HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2 | GPIO_PIN_3);
 
+        /* USART2 DMA DeInit */
+        HAL_DMA_DeInit(uartHandle->hdmarx);
+        HAL_DMA_DeInit(uartHandle->hdmatx);
         /* USER CODE BEGIN USART2_MspDeInit 1 */
 
         /* USER CODE END USART2_MspDeInit 1 */
@@ -228,24 +268,37 @@ void Usart_LogPrint(uint8_t *ch, uint16_t len)
 void Uart_ParseCommand(void)
 {
     if (g_flag_usartrec == 1) {
-        if (g_command[0] == 0x31) {
-            pos_left += 6;
-        } else if (g_command[3] == 0x32) {
-            g_vel += 10.f;
-            printf("%f\r\n", g_vel);
-        } else if (g_command[3] == 0x33) {
-            g_vel -= 10.f;
-            printf("%f\r\n", g_vel);
-        } else if (g_command[3] == 0x34) {
-            g_hight += 10;
-            printf("%d\r\n", g_hight);
-        } else if (g_command[3] == 0x35) {
-            g_hight -= 10;
-            printf("%d\r\n", g_hight);
-        } else if (g_command[3] == 0x36) {
-            wheel_run = ~wheel_run;
-            MOTOR_L_TOGGLE;
-            MOTOR_R_TOGGLE;
+        // if (g_command[0] == 0x31) {
+        //     pos_left += 6;
+        // } else if (g_command[3] == 0x32) {
+        //     g_vel += 10.f;
+        //     printf("%f\r\n", g_vel);
+        // } else if (g_command[3] == 0x33) {
+        //     g_vel -= 10.f;
+        //     printf("%f\r\n", g_vel);
+        // } else if (g_command[3] == 0x34) {
+        //     g_hight += 10;
+        //     printf("%d\r\n", g_hight);
+        // } else if (g_command[3] == 0x35) {
+        //     g_hight -= 10;
+        //     printf("%d\r\n", g_hight);
+        // } else if (g_command[3] == 0x36) {
+        //     wheel_run = ~wheel_run;
+        //     MOTOR_L_TOGGLE;
+        //     MOTOR_R_TOGGLE;
+        // }
+        switch (g_command[3]) {
+        case '1':
+            i2cl = ~i2cl;
+            break;
+        case '2':
+            i2cr = ~i2cr;
+            break;
+        case '3':
+            i2cm = ~i2cm;
+            break;
+        default:
+            break;
         }
         g_flag_usartrec = 0;
     }
