@@ -136,7 +136,7 @@ void FOC_PositionCloseloop(Motor_TypeDef *m, float motor_target, float angle, fl
     SetTorque(m, constrain(-Kp * (motor_target - m->DIR * Sensor_Angle) * 180 / _PI, -6, 6), Closeloop_ElecAngle(m, Sensor_Angle));
 }
 
-static float s_shaft_angle = 0;
+static float g_shaft_angle = 0;
 
 static float Openloop_ElecAngle(Motor_TypeDef *m, float angle)
 {
@@ -147,8 +147,8 @@ void FOC_VelocityOpenLoop(Motor_TypeDef *m, float target_v)
 {
     float Ts = 0.001;
 
-    s_shaft_angle = s_shaft_angle + target_v * Ts;
-    // LOG_DEBUG("%f\r\n", s_shaft_angle);
+    g_shaft_angle = g_shaft_angle + target_v * Ts;
+    // LOG_DEBUG("%f\r\n", g_shaft_angle);
     float Uq = V_POWER / 2;
-    SetTorque(m, Uq, Openloop_ElecAngle(m, s_shaft_angle));
+    SetTorque(m, Uq, Openloop_ElecAngle(m, g_shaft_angle));
 }

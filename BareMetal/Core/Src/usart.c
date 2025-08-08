@@ -304,12 +304,12 @@ void Uart_ParseCommand(void)
     }
 }
 
-void vFTUart_Send(uint8_t *nDat, int nLen)
+void FTUart_Send(uint8_t *nDat, int nLen)
 {
     HAL_UART_Transmit(&huart2, nDat, nLen, 100);
 }
 
-int lFTUart_Read(uint8_t *nDat, int nLen)
+int FTUart_Read(uint8_t *nDat, int nLen)
 {
     if (HAL_OK != HAL_UART_Receive(&huart2, nDat, nLen, 100)) {
         return 0;
@@ -318,7 +318,7 @@ int lFTUart_Read(uint8_t *nDat, int nLen)
     }
 }
 
-void vFTBus_Delay(void)
+void FTBus_Delay(void)
 {
     HAL_Delay(1);
 }

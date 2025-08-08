@@ -6,11 +6,11 @@
 #include "tim.h"
 #include <stdio.h>
 
-static LPF_TypeDef s_ltf_pwr;
+static LPF_TypeDef g_ltf_pwr;
 
 void Battery_Init(void)
 {
-    LPF_Init(&s_ltf_pwr, 7.5, 0.3);
+    LPF_Init(&g_ltf_pwr, 7.5, 0.3);
     if (HAL_TIM_Base_Start_IT(&htim5) == HAL_OK) {
         LOG_INFO("Power detection initialization successful!");
     } else {
@@ -28,7 +28,7 @@ static void Battery_TimerCallback(void)
 
     if (HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK) {
         ADC_Result = HAL_ADC_GetValue(&hadc1);
-        Voltage = LowPassFilter(&s_ltf_pwr, (float)ADC_Result / 311);
+        Voltage = LowPassFilter(&g_ltf_pwr, (float)ADC_Result / 311);
         if (i >= 4 || i < 0) {
             i = 0;
             Led_Toggle();

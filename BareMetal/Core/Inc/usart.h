@@ -31,7 +31,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
-#include "shared.h"
+#include "info.h"
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
@@ -50,9 +50,9 @@ extern uint8_t g_rx_buf[RX_BUF_SIZE];
 
 void Usart_LogPrint(uint8_t *ch, uint16_t len);
 void Uart_ParseCommand(void);
-void vFTUart_Send(uint8_t *nDat, int nLen);
-int  lFTUart_Read(uint8_t *nDat, int nLen);
-void vFTBus_Delay(void);
+void FTUart_Send(uint8_t *nDat, int nLen);
+int  FTUart_Read(uint8_t *nDat, int nLen);
+void FTBus_Delay(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
@@ -60,4 +60,3 @@ void vFTBus_Delay(void);
 #endif
 
 #endif /* __USART_H__ */
-

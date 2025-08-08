@@ -1,8 +1,8 @@
 /*
  * SCServo.c
- * ·ÉÌØ¶æ»úÓ²¼þ½Ó¿Ú²ã³ÌÐò
- * ÈÕÆÚ: 2024.12.2
- * ×÷Õß: txl
+ * ï¿½ï¿½ï¿½Ø¶ï¿½ï¿½Ó²ï¿½ï¿½ï¿½Ó¿Ú²ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½: 2024.12.2
+ * ï¿½ï¿½ï¿½ï¿½: txl
  */
 #include <stdint.h>
 #include "usart.h"
@@ -11,39 +11,39 @@ static uint8_t wBuf[128];
 static uint8_t wLen = 0;
 
 void ftUart_Send(uint8_t *nDat, int nLen);
-int ftUart_Read(uint8_t *nDat, int nLen);
+int  ftUart_Read(uint8_t *nDat, int nLen);
 void ftBus_Delay(void);
 
-//UART ½ÓÊÕÊý¾Ý½Ó¿Ú
+// UART ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½Ó¿ï¿½
 int readSCS(unsigned char *nDat, int nLen)
 {
-	return lFTUart_Read(nDat, nLen);
+    return FTUart_Read(nDat, nLen);
 }
 
-//UART ·¢ËÍÊý¾Ý½Ó¿Ú
+// UART ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½Ó¿ï¿½
 int writeSCS(unsigned char *nDat, int nLen)
 {
-	while(nLen--){
-		if(wLen<sizeof(wBuf)){
-			wBuf[wLen] = *nDat;
-			wLen++;
-			nDat++;
-		}
-	}
-	return wLen;
+    while (nLen--) {
+        if (wLen < sizeof(wBuf)) {
+            wBuf[wLen] = *nDat;
+            wLen++;
+            nDat++;
+        }
+    }
+    return wLen;
 }
 
-//½ÓÊÕ»º³åÇøË¢ÐÂ
+//ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½ï¿½
 void rFlushSCS()
 {
-	vFTBus_Delay();
+    FTBus_Delay();
 }
 
-//·¢ËÍ»º³åÇøË¢ÐÂ
+//ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½ï¿½
 void wFlushSCS()
 {
-	if(wLen){
-		vFTUart_Send(wBuf, wLen);
-		wLen = 0;
-	}
+    if (wLen) {
+        FTUart_Send(wBuf, wLen);
+        wLen = 0;
+    }
 }

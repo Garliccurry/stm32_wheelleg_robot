@@ -18,7 +18,7 @@
         "cirbuf.h": "c",
         "foc.h": "c",
         "math.h": "c",
-        "shared.h": "c"
+        "info.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.formatting": "clangFormat"

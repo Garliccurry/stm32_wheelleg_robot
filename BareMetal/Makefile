@@ -78,7 +78,7 @@ MyLib/device.c \
 MyLib/filter.c \
 MyLib/pid.c \
 MyApp/battery.c \
-MyApp/shared.c \
+MyApp/info.c \
 MyApp/log.c \
 MyApp/foc.c 
 

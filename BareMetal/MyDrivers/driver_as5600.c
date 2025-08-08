@@ -7,15 +7,15 @@
 extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c3;
 
-static I2C_Device  s_AS5600_L, s_AS5600_R;
-static LPF_TypeDef s_lpf_l, s_lpf_r;
+static I2C_Device  g_AS5600_L, g_AS5600_R;
+static LPF_TypeDef g_lpf_l, g_lpf_r;
 
 I2C_Device *AS5600_GetHandle(int i)
 {
     if (i == 1)
-        return &s_AS5600_L;
+        return &g_AS5600_L;
     if (i == 2)
-        return &s_AS5600_R;
+        return &g_AS5600_R;
     else
         return NULL;
 }
@@ -23,8 +23,8 @@ I2C_Device *AS5600_GetHandle(int i)
 void AS5600_Init(void)
 {
     HAL_StatusTypeDef status = HAL_OK;
-    status |= Device_I2C_Register(&s_AS5600_L, &hi2c1, AS5600_ADDRESS, I2C_DEVICE_AS5600);
-    status |= Device_I2C_Register(&s_AS5600_R, &hi2c3, AS5600_ADDRESS, I2C_DEVICE_AS5600);
+    status |= Device_I2C_Register(&g_AS5600_L, &hi2c1, AS5600_ADDRESS, I2C_DEVICE_AS5600);
+    status |= Device_I2C_Register(&g_AS5600_R, &hi2c3, AS5600_ADDRESS, I2C_DEVICE_AS5600);
     if (status == HAL_OK) {
         LOG_INFO("as5600 initialization successful!");
     } else {
@@ -35,20 +35,19 @@ void AS5600_Init(void)
 
 void AS5600_DataInit(AS5600_Data *data_l, AS5600_Data *data_r)
 {
-    data_l->ltf = &s_lpf_l;
-    data_r->ltf = &s_lpf_r;
-    LPF_Init(&s_lpf_l, 0, 0.5);
-    LPF_Init(&s_lpf_r, 0, 0.5);
+    data_l->ltf = &g_lpf_l;
+    data_r->ltf = &g_lpf_r;
+    LPF_Init(&g_lpf_l, 0, 0.5);
+    LPF_Init(&g_lpf_r, 0, 0.5);
 }
 
 void AS5600_ReadData(I2C_Device *dev, uint8_t *asdata) // 2字节100us
 {
     HAL_StatusTypeDef status = HAL_OK;
 
-    status = HAL_I2C_Mem_Read(dev->hi2c, dev->dev_addr,
-                              AS5600_REGISTER_RAW_ANGLE_HIGH,
-                              I2C_MEMADD_SIZE_8BIT, asdata, 2,
-                              AS5600_TIMEOUT);
+    status = HAL_I2C_Mem_Read_DMA(dev->hi2c, dev->dev_addr,
+                                  AS5600_REGISTER_RAW_ANGLE_HIGH,
+                                  I2C_MEMADD_SIZE_8BIT, asdata, 2);
     if (status != HAL_OK) {
         printf("AS %d\r\n", status);
     }

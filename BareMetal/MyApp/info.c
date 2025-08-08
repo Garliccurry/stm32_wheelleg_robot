@@ -1,6 +1,4 @@
-#include "shared.h"
-//#include "sensor.h"
-//#include "control.h"
+#include "info.h"
 
 int g_flag_usartrec = 0;
 
