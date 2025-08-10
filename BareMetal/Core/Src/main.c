@@ -31,6 +31,7 @@
 #include "log.h"
 #include "foc.h"
 #include "SCSCL.h"
+#include "motion.h"
 #include "driver_mpu6050.h"
 #include "driver_as5600.h"
 /* USER CODE END Includes */
@@ -123,23 +124,17 @@ int main(void)
     log_SetFmt(0);
 
     Battery_Init();
-    MPU6050_Init();
-    AS5600_Init();
-    AS5600_DataInit(&AS_L, &AS_R);
-    AS5600_L = AS5600_GetHandle(1);
-    AS5600_R = AS5600_GetHandle(2);
-    FOC_MoterInit(&motor_L, &motor_R, &htim4, &htim3, AS5600_L, AS5600_R);
+    // FOC_MoterInit(&motor_L, &motor_R, &htim4, &htim3, AS5600_L, AS5600_R);
 
     LPF_Init(&lpf_gyr_y, 0, 0.1);
-
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, g_rx_buf, RX_BUF_SIZE);
+    Motion_Init();
     /* USER CODE END 2 */
-
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
-
+        Motion_GetSensorData();
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
