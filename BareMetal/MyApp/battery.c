@@ -19,7 +19,7 @@ void Battery_Init(void)
     HAL_Delay(10);
 }
 
-static void Battery_TimerCallback(void)
+void Battery_TimerCallback(void)
 {
     uint32_t   ADC_Result = 0;
     float      Voltage = 0;
@@ -32,21 +32,8 @@ static void Battery_TimerCallback(void)
         if (i >= 4 || i < 0) {
             i = 0;
             Led_Toggle();
-            LOG_INFO("Power voltage:%.2f", Voltage);
+            // LOG_INFO("Power voltage:%.2f", Voltage);
         }
         i++;
     }
-}
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    /* USER CODE BEGIN Callback 0 */
-
-    /* USER CODE END Callback 0 */
-
-    /* USER CODE BEGIN Callback 1 */
-    if (htim->Instance == TIM5) {
-        Battery_TimerCallback();
-    }
-    /* USER CODE END Callback 1 */
 }

@@ -24,9 +24,9 @@ static HAL_StatusTypeDef MPU6050_WriteRegister(I2C_Device *dev, uint8_t reg, uin
 
 HAL_StatusTypeDef MPU6050_ReadRegister(I2C_Device *dev, uint8_t reg, uint8_t *pdata, uint16_t size)
 {
-    return HAL_I2C_Mem_Read(dev->hi2c, dev->dev_addr,
-                            reg, I2C_MEMADD_SIZE_8BIT,
-                            pdata, size, MPU6050_TIMEOUT);
+    return HAL_I2C_Mem_Read_DMA(dev->hi2c, dev->dev_addr,
+                                reg, I2C_MEMADD_SIZE_8BIT,
+                                pdata, size);
 }
 
 int MPU6050_GetID(void)

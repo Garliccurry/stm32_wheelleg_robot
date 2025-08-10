@@ -18,7 +18,21 @@
         "cirbuf.h": "c",
         "foc.h": "c",
         "math.h": "c",
-        "info.h": "c"
+        "info.h": "c",
+        "motion.h": "c",
+        "driver_as5600.h": "c",
+        "string_view": "c",
+        "i2c.h": "c",
+        "device.h": "c",
+        "stdatomic.h": "c",
+        "optional": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "ostream": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.formatting": "clangFormat"

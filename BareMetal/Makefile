@@ -78,6 +78,7 @@ MyLib/device.c \
 MyLib/filter.c \
 MyLib/pid.c \
 MyApp/battery.c \
+MyApp/motion.c \
 MyApp/info.c \
 MyApp/log.c \
 MyApp/foc.c 

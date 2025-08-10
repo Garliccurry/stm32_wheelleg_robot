@@ -12,23 +12,6 @@ typedef enum {
 
 typedef struct
 {
-    float roll;
-    float pitch;
-    float yaw;
-} MPU6050_Data;
-
-typedef struct
-{
-    float        angle_pre;
-    float        angle_now;
-    float        rota_now;
-    float        rota_pre;
-    uint32_t     time_pre;
-    LPF_TypeDef *ltf;
-} AS5600_Data;
-
-typedef struct
-{
     I2C_HandleTypeDef *hi2c;
     uint8_t            dev_addr;
     uint16_t           dev_id;
