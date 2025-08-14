@@ -111,8 +111,8 @@ int main(void)
     uint8_t       MpuRawData[10], AsRawDataL[2], AsRawDataR[2];
     int16_t       acc[3], gyro_y, gyro_z;
     uint16_t      pos_l, pos_r;
-    AS5600_Data   AS_L, AS_R;
-    I2C_Device   *AS5600_L, *AS5600_R;
+    AsData_t      AS_L, AS_R;
+    I2cDevice_t  *AS5600_L, *AS5600_R;
     float         ang_roll, ang_pitch, ang_l, ang_r, rot_l, rot_r, vel_l, vel_r, gyr_y, gyr_z;
     int           Lpos_l = -1, Lpos_r = -1;
     float         error_stand, pid_stand, Kp_s = -0.65, Kd_s = -0.00;

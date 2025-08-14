@@ -5,6 +5,7 @@
 
 #include "main.h"
 #include "device.h"
+#include "log.h"
 
 #define MPU6050_SMPLRT_DIV   0x19
 #define MPU6050_CONFIG       0x1A
@@ -52,10 +53,11 @@
 struct mpu6050_data {
     int32_t angle_x;
 };
-I2C_Device *MPU6050_GetHandle(void);
-void        MPU6050_Init(void);
-int         MPU6050_GetID(void);
-void        MPU6050_ReadData(uint8_t *data);
-void        MPU6050_ParseData(int16_t *data, float *Ang_x, float *Ang_y);
+I2cDevice_t       *MPU6050_GetHandle(void);
+void              MPU6050_Init(void);
+int               MPU6050_GetID(void);
+HAL_StatusTypeDef MPU6050_ReadData(uint8_t *data);
+void              MPU6050_GetData(MpuData_t *mdata, uint8_t *rawdata);
+void              MPU6050_ParseData(int16_t *data, float *Ang_x, float *Ang_y);
 
 #endif

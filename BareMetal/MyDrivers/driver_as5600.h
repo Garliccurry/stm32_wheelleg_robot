@@ -23,11 +23,11 @@ typedef enum {
     AS5600DirBottom
 } AS5600Dir;
 /***********************    FUNCTION PROTOTYPES    ***********************/
-I2C_Device *AS5600_GetHandle(int dir);
-void        AS5600_Init(void);
-void        AS5600_ReadData(I2C_Device *dev, uint8_t *data);
-float       AS5600_GetAng(uint16_t raw_data);
-float       AS5600_GetVel(AS5600_Data *as5600);
-void        AS5600_AngleUpdate(AS5600_Data *asdata, float angle);
-// void AS5600_AngleUpdate(AS5600_Data *as5600, float angle);
+I2cDevice_t      *AS5600_GetHandle(int dir);
+void              AS5600_Init(void);
+HAL_StatusTypeDef AS5600_ReadData(I2cDevice_t *dev, uint8_t *data);
+float             AS5600_GetAng(uint16_t raw_data);
+float             AS5600_GetVel(AsData_t *as5600);
+void              AS5600_AngleUpdate(AsData_t *asdata, float angle);
+// void AS5600_AngleUpdate(AsData_t *as5600, float angle);
 #endif

@@ -4,7 +4,7 @@
 void LPF_Init(LPF_TypeDef *lpf, float y_init, float alpha)
 {
     lpf->alpha = alpha;
-    lpf->y_prev = 0;
+    lpf->y_prev = y_init;
 }
 
 float LowPassFilter(LPF_TypeDef *lpf, float x)

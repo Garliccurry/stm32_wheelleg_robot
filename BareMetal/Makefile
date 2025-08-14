@@ -76,6 +76,7 @@ MyDrivers/driver_as5600.c \
 MyDrivers/driver_led.c \
 MyLib/device.c \
 MyLib/filter.c \
+MyLib/cirbuf.c \
 MyLib/pid.c \
 MyApp/battery.c \
 MyApp/motion.c \
