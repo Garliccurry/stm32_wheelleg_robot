@@ -261,7 +261,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 void Usart_LogPrint(uint8_t *ch, uint16_t len)
 {
-    HAL_UART_Transmit(&huart1, ch, len, 100);
+    HAL_UART_Transmit(&huart1, ch, len, 10000);
 }
 
 #include "foc.h"

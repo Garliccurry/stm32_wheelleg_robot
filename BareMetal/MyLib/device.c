@@ -2,7 +2,7 @@
 
 static uint8_t g_id = 0;
 
-HAL_StatusTypeDef Device_I2C_Register(I2C_Device *dev, I2C_HandleTypeDef *hi2c, uint8_t addr, I2CDeviceType type)
+HAL_StatusTypeDef Device_I2C_Register(I2cDevice_t *dev, I2C_HandleTypeDef *hi2c, uint8_t addr, I2CDeviceTypeEnum type)
 {
     if (!(dev && hi2c) || (dev->hi2c) || (dev->dev_addr) || (dev->dev_type)) {
         return HAL_ERROR;

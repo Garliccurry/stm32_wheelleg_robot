@@ -9,8 +9,8 @@ static PID_TypeDef g_Vpid_L, g_Vpid_R, g_Ppid_L, g_Ppid_R;
 void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
                    TIM_HandleTypeDef *htim_L,
                    TIM_HandleTypeDef *htim_R,
-                   I2C_Device        *as_dev_L,
-                   I2C_Device        *as_dev_R)
+                   I2cDevice_t       *as_dev_L,
+                   I2cDevice_t       *as_dev_R)
 {
     if (!(m_L && m_R && htim_L && htim_R)) {
         LOG_INFO("FOC initialization failed!");

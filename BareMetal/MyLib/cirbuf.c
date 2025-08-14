@@ -1,38 +1,57 @@
 #include <stdint.h>
 #include "cirbuf.h"
-void CirBuf_Init(CB_TypeDef *CB_handle, uint32_t len, uint8_t *buf)
+void CirBuf_AsDataInit(CirBuf_t *CirBuf, uint32_t len, AsRawDataBuf_t *buf)
 {
-    CB_handle->r = CB_handle->w = 0;
-    CB_handle->len = len;
-    CB_handle->buf = buf;
+    CirBuf->r_pos = CirBuf->w_pos = 0;
+    CirBuf->len = len;
+    CirBuf->buf = buf;
 }
 
-int CirBuf_Write(CB_TypeDef *CB_handle, uint8_t val)
+uint32_t CirBuf_AsDataWrite(CirBuf_t *CirBuf, uint16_t dataL, uint16_t dataR)
 {
-    uint32_t next_w;
+    uint32_t next_w = (CirBuf->w_pos + 1) % CirBuf->len; // 优化回绕计算
+    if (next_w == CirBuf->r_pos) return WL_ERROR;        // 缓冲区满
 
-    next_w = ((CB_handle->w + 1) != CB_handle->len) ? (CB_handle->w + 1) : 0;
-
-    if (next_w != CB_handle->r) {
-        CB_handle->buf[CB_handle->w] = val;
-        CB_handle->w = next_w;
-        return 0;
-    } else {
-        return -1;
-    }
+    CirBuf->buf[CirBuf->w_pos].dataL = dataL;
+    CirBuf->buf[CirBuf->w_pos].dataR = dataR;
+    CirBuf->w_pos = next_w; // 更新写位置
+    return WL_OK;
 }
 
-int CirBuf_Read(CB_TypeDef *CB_handle, uint8_t *pVal)
+uint32_t CirBuf_AsDataRead(CirBuf_t *CirBuf, uint16_t *dataL, uint16_t *dataR)
 {
-    if (CB_handle->r != CB_handle->w) {
-        *pVal = CB_handle->buf[CB_handle->r];
+    if (CirBuf->r_pos == CirBuf->w_pos) return WL_ERROR; // 缓冲区空
 
-        CB_handle->r++;
+    *dataL = CirBuf->buf[CirBuf->r_pos].dataL;
+    *dataR = CirBuf->buf[CirBuf->r_pos].dataR;
+    CirBuf->r_pos = (CirBuf->r_pos + 1) % CirBuf->len; // 修复：更新读位置
+    return WL_OK;
+}
 
-        if (CB_handle->r == CB_handle->len)
-            CB_handle->r = 0;
-        return 0;
-    } else {
-        return -1;
-    }
+void CirBuf_MpuDataInit(CirBuf_t *CirBuf, uint32_t len, AsRawDataBuf_t *buf)
+{
+    CirBuf->r_pos = CirBuf->w_pos = 0;
+    CirBuf->len = len;
+    CirBuf->buf = buf;
+}
+
+uint32_t CirBuf_MpuDataWrite(CirBuf_t *CirBuf, uint16_t dataL, uint16_t dataR)
+{
+    uint32_t next_w = (CirBuf->w_pos + 1) % CirBuf->len; // 优化回绕计算
+    if (next_w == CirBuf->r_pos) return WL_ERROR;        // 缓冲区满
+
+    CirBuf->buf[CirBuf->w_pos].dataL = dataL;
+    CirBuf->buf[CirBuf->w_pos].dataR = dataR;
+    CirBuf->w_pos = next_w; // 更新写位置
+    return WL_OK;
+}
+
+uint32_t CirBuf_MpuDataRead(CirBuf_t *CirBuf, uint16_t *dataL, uint16_t *dataR)
+{
+    if (CirBuf->r_pos == CirBuf->w_pos) return WL_ERROR; // 缓冲区空
+
+    *dataL = CirBuf->buf[CirBuf->r_pos].dataL;
+    *dataR = CirBuf->buf[CirBuf->r_pos].dataR;
+    CirBuf->r_pos = (CirBuf->r_pos + 1) % CirBuf->len; // 修复：更新读位置
+    return WL_OK;
 }

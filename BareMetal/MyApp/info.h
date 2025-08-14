@@ -17,24 +17,39 @@
     __enable_irq();         \
     val;                    \
 })
-#define AS5600_TEST 1
+#define AS5600_TEST      1
+#define WL_OK            0
+#define WL_ERROR         1
+#define MPU6050_DATASIZE 14
+#define AS_BUF_LEN       10
 /**************    CONSTANTS, MACROS, & DATA STRUCTURES    ***************/
+
+typedef struct {
+    uint16_t dataL;
+    uint16_t dataR;
+} AsRawDataBuf_t;
+
 typedef struct
 {
-    float roll;
-    float pitch;
-    float yaw;
-} MPU6050_Data;
+    float    temp;
+    float    accX;
+    float    accY;
+    float    accZ;
+    float    gyroX;
+    float    gyroY;
+    float    gyroZ;
+    uint32_t timestamp;
+} MpuData_t;
 
 typedef struct
 {
     float    angle_pre;
-    uint32_t angle_pre_ts;
+    float    rotat_pre;
+    uint32_t angle_pre_timestamp;
     float    Gvel_angle_pre;
-    uint32_t Gvel_angle_pre_ts;
-    float    rota_pre;
-    float    Gvel_rota_pre;
-} AS5600_Data;
+    float    Gvel_rotat_pre;
+    uint32_t Gvel_angle_pre_timestamp;
+} AsData_t;
 
 extern int g_flag_usartrec;
 
