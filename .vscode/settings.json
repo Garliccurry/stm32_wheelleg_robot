@@ -35,5 +35,6 @@
         "ostream": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
-    "C_Cpp.formatting": "clangFormat"
+    "C_Cpp.formatting": "clangFormat",
+    "cortex-debug.variableUseNaturalFormat": true
 }

@@ -17,6 +17,9 @@
                 "interface/stlink.cfg",
                 "target/stm32f4x.cfg"
             ],
+            "debuggerArgs": ["disassembly", "registers"],
+
+            "svdFile": "./STM32F407.svd",
             "gdbPath": "gdb-multiarch"
         }
     ]
