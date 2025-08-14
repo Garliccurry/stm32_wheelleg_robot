@@ -15,7 +15,7 @@ typedef enum {
     BusM,
 } BusState;
 
-void Motion_GetSensor(void);
+void Motion_TimerGetSensor(void);
 void Motion_GetSensorCallback(I2C_HandleTypeDef *hi2c);
 
 void Motion_GetSensorData(void);

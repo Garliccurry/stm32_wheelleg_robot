@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 extern I2C_HandleTypeDef hi2c3;
-static I2cDevice_t        g_MPU6050;
+static I2cDevice_t       g_MPU6050;
 static LPF_TypeDef       g_lpf_roll;
 
 I2cDevice_t *MPU6050_GetHandle(void)
@@ -46,7 +46,7 @@ int MPU6050_GetID(void)
 
 HAL_StatusTypeDef MPU6050_ReadData(uint8_t *data) // 10字节380us
 {
-    return MPU6050_MemReadRegister(&g_MPU6050, MPU6050_ACCEL_XOUT_H, data, MPU6050_DATASIZE);
+    return MPU6050_MemReadRegister(&g_MPU6050, MPU6050_ACCEL_XOUT_H, data, MPU6050_I2C_DATASIZE);
 }
 
 void MPU6050_Init(void)
@@ -68,24 +68,17 @@ void MPU6050_Init(void)
     HAL_Delay(10);
 }
 
-void MPU6050_GetData(MpuData_t *mdata, uint8_t *rawdata)
+void MPU6050_GetData(MpuData_t *mdata, int16_t *rawdata)
 {
-    int16_t rawAccX, rawAccY, rawAccZ, rawTemp, rawGyroX, rawGyroY, rawGyroZ;
-    rawAccX = rawdata[0] << 8 | rawdata[1];
-    rawAccY = rawdata[2] << 8 | rawdata[3];
-    rawAccZ = rawdata[4] << 8 | rawdata[5];
-    rawTemp = rawdata[6] << 8 | rawdata[7];
-    rawGyroX = rawdata[8] << 8 | rawdata[9];
-    rawGyroY = rawdata[10] << 8 | rawdata[11];
-    rawGyroZ = rawdata[12] << 8 | rawdata[13];
+    mdata->accX = ((float)rawdata[0]) / 16384.0;
+    mdata->accY = ((float)rawdata[1]) / 16384.0;
+    mdata->accZ = ((float)rawdata[2]) / 16384.0;
 
-    mdata->temp = (rawTemp + 12412.0) / 340.0;
-    mdata->accX = ((float)rawAccX) / 16384.0;
-    mdata->accY = ((float)rawAccY) / 16384.0;
-    mdata->accZ = ((float)rawAccZ) / 16384.0;
-    mdata->gyroX = ((float)rawGyroX) / 65.5;
-    mdata->gyroY = ((float)rawGyroY) / 65.5;
-    mdata->gyroZ = ((float)rawGyroZ) / 65.5;
+    mdata->temp = ((float)rawdata[3] + 12412.0) / 340.0;
+
+    mdata->gyroX = ((float)rawdata[4]) / 65.5;
+    mdata->gyroY = ((float)rawdata[5]) / 65.5;
+    mdata->gyroZ = ((float)rawdata[6]) / 65.5;
 }
 
 void MPU6050_ParseData(int16_t *data, float *Ang_roll, float *Ang_pitch)

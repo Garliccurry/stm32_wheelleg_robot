@@ -348,7 +348,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef *tim_pwmHandle)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2) {
-        Motion_GetSensor();
+        Motion_TimerGetSensor();
     }
     if (htim->Instance == TIM5) {
         Battery_TimerCallback();
