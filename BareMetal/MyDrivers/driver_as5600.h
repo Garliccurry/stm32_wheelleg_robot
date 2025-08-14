@@ -23,7 +23,7 @@ typedef enum {
     AS5600DirBottom
 } AS5600Dir;
 /***********************    FUNCTION PROTOTYPES    ***********************/
-I2cDevice_t      *AS5600_GetHandle(int dir);
+I2cDevice_t      *AS5600_GetHandle(AS5600Dir dir);
 void              AS5600_Init(void);
 HAL_StatusTypeDef AS5600_ReadData(I2cDevice_t *dev, uint8_t *data);
 float             AS5600_GetAng(uint16_t raw_data);

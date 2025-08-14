@@ -10,7 +10,7 @@ extern I2C_HandleTypeDef hi2c3;
 static I2cDevice_t gI2C_AS_L, gI2C_AS_R;
 static LPF_TypeDef gLPF_L, gLPF_R;
 
-I2cDevice_t *AS5600_GetHandle(int dir)
+I2cDevice_t *AS5600_GetHandle(AS5600Dir dir)
 {
     if (dir == AS5600Left)
         return &gI2C_AS_L;

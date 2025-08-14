@@ -53,11 +53,11 @@
 struct mpu6050_data {
     int32_t angle_x;
 };
-I2cDevice_t       *MPU6050_GetHandle(void);
+I2cDevice_t      *MPU6050_GetHandle(void);
 void              MPU6050_Init(void);
 int               MPU6050_GetID(void);
 HAL_StatusTypeDef MPU6050_ReadData(uint8_t *data);
-void              MPU6050_GetData(MpuData_t *mdata, uint8_t *rawdata);
+void              MPU6050_GetData(MpuData_t *mdata, int16_t *rawdata);
 void              MPU6050_ParseData(int16_t *data, float *Ang_x, float *Ang_y);
 
 #endif
