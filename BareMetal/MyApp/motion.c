@@ -42,8 +42,10 @@ static void Motion_StartGetAS5600(void)
     status |= AS5600_ReadData(gI2C_ASR, gASRawDataR);
     status |= AS5600_ReadData(gI2C_ASL, gASRawDataL);
     if (status != HAL_OK) {
-        LOG_ERROR("AS I2C STATUS: %d", status);
+        gI2cErrorCount++;
+        return;
     }
+    gflag_I2cRrror = WLStatusOff;
 }
 
 static void Motion_StartGetMPU6050(void)
@@ -52,8 +54,10 @@ static void Motion_StartGetMPU6050(void)
     uint32_t status = HAL_OK;
     status = MPU6050_ReadData(gMPURawData);
     if (status != HAL_OK) {
-        LOG_ERROR("MPU I2C STATUS: %d", status);
+        gI2cErrorCount++;
+        return;
     }
+    gflag_I2cRrror = WLStatusOff;
 }
 void Motion_TimerGetSensor(void) // 定时器周期回调
 {

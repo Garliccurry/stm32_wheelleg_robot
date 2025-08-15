@@ -351,7 +351,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         Motion_TimerGetSensor();
     }
     if (htim->Instance == TIM5) {
-        Battery_TimerCallback();
+        Info_TimerCallback();
     }
 }
 

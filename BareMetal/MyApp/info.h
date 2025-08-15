@@ -59,18 +59,32 @@ typedef struct
 } AsData_t;
 
 typedef enum {
+    WLStatusIdle = 0,
+    WLStatusAct = 1,
+    WLStatusOn,
+    WLStatusOff,
+
+} WlFlagStatus;
+
+typedef enum {
     WL_ERRINIT = 65536, // Error code for placeholder
     WL_ERR65537,        // can not get battery voltage
-    WL_ERR65538,
+    WL_ERR65538,        // I2c was interrupted for some reason(eg. burning), causing a hardware deadlock
     WL_ERR65539,
 } WlErrorCode;
 
-extern uint8_t gflag_usartrec;
-extern uint8_t gflag_fatalerr;
+extern uint8_t gflag_UsartRec;
+extern uint8_t gflag_FatalErr;
+extern uint8_t gflag_I2cRrror;
+
+extern uint32_t gI2cErrorCount;
 
 extern float gVoltage;
 
 /***********************    FUNCTION PROTOTYPES    ***********************/
-void info_atomic_write(int *ptr, int value);
-int  info_atomic_read(int *ptr);
+void info_atomic_write_s32(int *ptr, int value);
+int  info_atomic_read_s32(int *ptr);
+
+void Info_TimerCallback(void);
+void Info_ProcessAffair(void);
 #endif

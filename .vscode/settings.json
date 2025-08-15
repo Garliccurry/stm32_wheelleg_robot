@@ -32,7 +32,8 @@
         "tuple": "c",
         "type_traits": "c",
         "utility": "c",
-        "ostream": "c"
+        "ostream": "c",
+        "stdio.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.formatting": "clangFormat",

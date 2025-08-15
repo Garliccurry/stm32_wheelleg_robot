@@ -122,6 +122,7 @@ int main(void)
         /* USER CODE END WHILE */
         Motion_GetMpuData();
         Motion_GetFocData();
+        Info_ProcessAffair();
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
