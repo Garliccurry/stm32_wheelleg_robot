@@ -6,11 +6,11 @@
 #include "tim.h"
 #include <stdio.h>
 
-static LPF_TypeDef g_ltf_pwr;
+static LPF_TypeDef gLpfPower;
 
 void Battery_Init(void)
 {
-    LPF_Init(&g_ltf_pwr, 7.5, 0.3);
+    LPF_Init(&gLpfPower, 7.5, 0.3);
     if (HAL_TIM_Base_Start_IT(&htim5) == HAL_OK) {
         LOG_INFO("Power detection initialization successful!");
     } else {
@@ -19,32 +19,36 @@ void Battery_Init(void)
     HAL_Delay(10);
 }
 
+uint32_t Battery_GetData(uint32_t *adc_rlst)
+{
+    if (HAL_ADC_Start(&hadc1) != HAL_OK) { return WL_ERROR; }
+    if (HAL_ADC_PollForConversion(&hadc1, 100) != HAL_OK) { return WL_ERROR; }
+    *adc_rlst = HAL_ADC_GetValue(&hadc1);
+    return WL_OK;
+}
+
 void Battery_TimerCallback(void)
 {
     uint32_t       ADC_Result = 0;
-    float          Voltage = 0;
-    static uint8_t i = 0;
-    static uint8_t num = 4;
-    HAL_ADC_Start(&hadc1);
+    static uint8_t TIM5base_cnt = 0;
+    static uint8_t target_num = 4;
+    if (Battery_GetData(&ADC_Result) != WL_OK) { LOG_ERROR("can not get adc, ret:%d", WL_ERR65537); }
+    gVoltage = LowPassFilter(&gLpfPower, (float)ADC_Result / 311);
 
-    if (HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK) {
-        ADC_Result = HAL_ADC_GetValue(&hadc1);
-        Voltage = LowPassFilter(&g_ltf_pwr, (float)ADC_Result / 311);
-        if (Voltage < 7.5f) {
-            LOG_INFO("Power voltage:%.2f", Voltage);
-            num = 1;
-        } else if (Voltage < 7.6f) {
-            num = 2;
-        } else if (Voltage < 7.8f) {
-            num = 3;
-        } else {
-            num = 4;
-        }
-
-        if (i >= num) {
-            i = 0;
-            Led_Toggle();
-        }
-        i++;
+    if (gVoltage < 7.5f) {
+        LOG_INFO("Power voltage:%.2f", gVoltage);
+        target_num = 1;
+    } else if (gVoltage < 7.6f) {
+        target_num = 2;
+    } else if (gVoltage < 7.7f) {
+        target_num = 3;
+    } else {
+        target_num = 4;
     }
+
+    if (TIM5base_cnt >= target_num && gflag_fatalerr == WL_OK) {
+        TIM5base_cnt = 0;
+        Led_Toggle();
+    }
+    TIM5base_cnt++;
 }

@@ -93,7 +93,7 @@ void Motion_GetSensorCallback(I2C_HandleTypeDef *hi2c) // i2c mem中断回调
     }
 }
 
-void Motion_GetSensorData(void)
+void Motion_GetFocData(void)
 {
     static uint16_t shaft_raw_angle_L, shaft_raw_angle_R;
     static float    shaft_angle_L, shaft_angle_R;
@@ -105,11 +105,14 @@ void Motion_GetSensorData(void)
         AS5600_AngleUpdate(&gASdata_R, shaft_angle_R);
         // LOG_DEBUG("%f, %f", shaft_angle_L, shaft_angle_R);
     }
+}
 
+void Motion_GetMpuData(void)
+{
     static MpuRawData_t rawdata;
     if (CirBuf_MpuDataRead(&gCirMpuRawBuff, &rawdata) == WL_OK) {
         MPU6050_GetData(&gMPUdata, rawdata.data);
-        LOG_DEBUG("%f,%f,%f", gMPUdata.accX, gMPUdata.accY, gMPUdata.accZ);
+        // LOG_DEBUG("%f,%f,%f", gMPUdata.accX, gMPUdata.accY, gMPUdata.accZ);
     }
 }
 
