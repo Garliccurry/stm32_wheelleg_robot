@@ -58,16 +58,18 @@ typedef struct
     uint32_t Gvel_angle_pre_timestamp;
 } AsData_t;
 
-extern int g_flag_usartrec;
+typedef enum {
+    WL_ERRINIT = 65536, // Error code for placeholder
+    WL_ERR65537,        // can not get battery voltage
+    WL_ERR65538,
+    WL_ERR65539,
+} WlErrorCode;
 
-extern int   pos_left;
-extern float g_vel;
-extern int   g_hight;
-extern int   wheel_run;
+extern uint8_t gflag_usartrec;
+extern uint8_t gflag_fatalerr;
 
-extern int i2cl;
-extern int i2cr;
-extern int i2cm;
+extern float gVoltage;
+
 /***********************    FUNCTION PROTOTYPES    ***********************/
 void info_atomic_write(int *ptr, int value);
 int  info_atomic_read(int *ptr);

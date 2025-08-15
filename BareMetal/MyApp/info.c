@@ -1,14 +1,9 @@
 #include "info.h"
 
-int g_flag_usartrec = 0;
+uint8_t gflag_usartrec = 0;
+uint8_t gflag_fatalerr = 0;
 
-int   pos_left = 0;
-float g_vel = 0;
-int   g_hight = 0;
-int   wheel_run = 0;
-int   i2cl = 0;
-int   i2cr = 0;
-int   i2cm = 0;
+float gVoltage = 7.4;
 
 void info_atomic_write(int *ptr, int value)
 {

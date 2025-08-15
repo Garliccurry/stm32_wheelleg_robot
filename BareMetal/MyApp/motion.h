@@ -18,6 +18,8 @@ typedef enum {
 void Motion_TimerGetSensor(void);
 void Motion_GetSensorCallback(I2C_HandleTypeDef *hi2c);
 
-void Motion_GetSensorData(void);
+void Motion_GetFocData(void);
+void Motion_GetMpuData(void);
+
 void Motion_Init(void);
 #endif

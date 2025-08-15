@@ -107,26 +107,12 @@ int main(void)
     MX_TIM5_Init();
     MX_TIM2_Init();
     /* USER CODE BEGIN 2 */
-    Motor_TypeDef motor_L, motor_R;
-    uint8_t       MpuRawData[10], AsRawDataL[2], AsRawDataR[2];
-    int16_t       acc[3], gyro_y, gyro_z;
-    uint16_t      pos_l, pos_r;
-    AsData_t      AS_L, AS_R;
-    I2cDevice_t  *AS5600_L, *AS5600_R;
-    float         ang_roll, ang_pitch, ang_l, ang_r, rot_l, rot_r, vel_l, vel_r, gyr_y, gyr_z;
-    int           Lpos_l = -1, Lpos_r = -1;
-    float         error_stand, pid_stand, Kp_s = -0.65, Kd_s = -0.00;
-    int           count = 0;
-    LPF_TypeDef   lpf_gyr_y;
-    uint8_t       raw_angle[2];
 
     log_RegisterOutput(Usart_LogPrint);
     log_SetFmt(0);
 
     Battery_Init();
     // FOC_MoterInit(&motor_L, &motor_R, &htim4, &htim3, AS5600_L, AS5600_R);
-
-    LPF_Init(&lpf_gyr_y, 0, 0.1);
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, g_rx_buf, RX_BUF_SIZE);
     Motion_Init();
     /* USER CODE END 2 */
@@ -134,7 +120,8 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
-        Motion_GetSensorData();
+        Motion_GetMpuData();
+        Motion_GetFocData();
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
