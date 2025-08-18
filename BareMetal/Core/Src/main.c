@@ -116,13 +116,12 @@ int main(void)
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, g_rx_buf, RX_BUF_SIZE);
     Motion_Init();
     /* USER CODE END 2 */
+
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
-        Motion_GetMpuData();
-        Motion_GetFocData();
-        Info_ProcessAffair();
+
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
