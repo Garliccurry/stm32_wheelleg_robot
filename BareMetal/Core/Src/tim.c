@@ -343,12 +343,15 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef *tim_pwmHandle)
 }
 
 /* USER CODE BEGIN 1 */
+#include "softtimer.h"
 #include "battery.h"
-#include "motion.h"
+#include "sensor.h"
+#include "info.h"
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2) {
-        Motion_TimerGetSensor();
+        Sensor_TimerGetSensor();
+        SoftwareTimer_Update();
     }
     if (htim->Instance == TIM5) {
         Info_TimerCallback();

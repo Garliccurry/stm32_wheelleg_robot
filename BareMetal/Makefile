@@ -74,12 +74,14 @@ Core/Src/system_stm32f4xx.c \
 MyDrivers/driver_mpu6050.c \
 MyDrivers/driver_as5600.c \
 MyDrivers/driver_led.c \
+MyLib/softtimer.c \
 MyLib/device.c \
 MyLib/filter.c \
 MyLib/cirbuf.c \
 MyLib/pid.c \
 MyApp/battery.c \
-MyApp/motion.c \
+MyApp/control.c \
+MyApp/sensor.c \
 MyApp/info.c \
 MyApp/log.c \
 MyApp/foc.c

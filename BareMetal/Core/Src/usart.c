@@ -219,8 +219,10 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-uint8_t        g_rx_buf[RX_BUF_SIZE];
-static uint8_t g_command[RX_BUF_SIZE];
+#include "foc.h"
+#include "log.h"
+uint8_t        gRxBuff[RX_BUF_SIZE];
+static uint8_t gCommand[RX_BUF_SIZE];
 #ifdef __GNUC__
 /* With GCC, small printf (option LD Linker->Libraries->Small printf
    set to 'Yes') calls __io_putchar() */
@@ -251,17 +253,20 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     if (huart->Instance == USART1) {
         if (Size == RX_BUF_SIZE) {
             for (int i = 0; i < RX_BUF_SIZE; i++) {
-                g_command[i] = g_rx_buf[i];
+                gCommand[i] = gRxBuff[i];
             }
             gflag_UsartRec = WLStatusAct;
         }
-        HAL_UARTEx_ReceiveToIdle_IT(huart, g_rx_buf, RX_BUF_SIZE);
+        HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
     }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART1) {
+        // return;
+    } else if (huart->Instance == USART2) {
+        gflag_Uart2Bus = WLUsartIdle;
     }
 }
 
@@ -270,30 +275,29 @@ void Usart_LogPrint(uint8_t *ch, uint16_t len)
     HAL_UART_Transmit(&huart1, ch, len, 10000);
 }
 
-#include "foc.h"
 void Uart_ParseCommand(void)
 {
     if (gflag_UsartRec == WLStatusAct) {
-        // if (g_command[0] == 0x31) {
+        // if (gCommand[0] == 0x31) {
         //     pos_left += 6;
-        // } else if (g_command[3] == 0x32) {
+        // } else if (gCommand[3] == 0x32) {
         //     g_vel += 10.f;
         //     printf("%f\r\n", g_vel);
-        // } else if (g_command[3] == 0x33) {
+        // } else if (gCommand[3] == 0x33) {
         //     g_vel -= 10.f;
         //     printf("%f\r\n", g_vel);
-        // } else if (g_command[3] == 0x34) {
+        // } else if (gCommand[3] == 0x34) {
         //     g_hight += 10;
         //     printf("%d\r\n", g_hight);
-        // } else if (g_command[3] == 0x35) {
+        // } else if (gCommand[3] == 0x35) {
         //     g_hight -= 10;
         //     printf("%d\r\n", g_hight);
-        // } else if (g_command[3] == 0x36) {
+        // } else if (gCommand[3] == 0x36) {
         //     wheel_run = ~wheel_run;
         //     MOTOR_L_TOGGLE;
         //     MOTOR_R_TOGGLE;
         // }
-        switch (g_command[3]) {
+        switch (gCommand[3]) {
         case '1':
             break;
         default:
@@ -305,7 +309,9 @@ void Uart_ParseCommand(void)
 
 void FTUart_Send(uint8_t *nDat, int nLen)
 {
-    HAL_UART_Transmit(&huart2, nDat, nLen, 100);
+    // HAL_UART_Transmit(&huart2, nDat, nLen, 100);
+    HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&huart2, nDat, nLen);
+    // LOG_DEBUG("start send uart2, status=%d", status);
 }
 
 int FTUart_Read(uint8_t *nDat, int nLen)
@@ -317,8 +323,17 @@ int FTUart_Read(uint8_t *nDat, int nLen)
     }
 }
 
-void FTBus_Delay(void)
+uint32_t FTBus_Delay(void)
 {
-    HAL_Delay(1);
+    // HAL_Delay(1);
+    uint32_t i = 0;
+    while (gflag_Uart2Bus != WLUsartIdle) {
+        i++;
+        if (i > 100) {
+            LOG_ERROR("waiting for SCS serial bus timeout, ret:%d", WL_ERR65539);
+            return WL_ERR65539;
+        }
+    }
+    return WL_OK;
 }
 /* USER CODE END 1 */

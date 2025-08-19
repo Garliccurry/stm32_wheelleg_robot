@@ -2,7 +2,7 @@
 #define _CIRBUF_H__
 
 #include <stdint.h>
-#include "motion.h"
+#include "sensor.h"
 #include "info.h"
 
 typedef struct {

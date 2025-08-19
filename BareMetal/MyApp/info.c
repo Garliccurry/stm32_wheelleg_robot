@@ -7,7 +7,8 @@
 #include "driver_led.h"
 uint8_t gflag_UsartRec = WLStatusIdle;
 uint8_t gflag_FatalErr = WLStatusOff;
-uint8_t gflag_I2cRrror = WLStatusOff;
+uint8_t gflag_I2cError = WLStatusOff;
+uint8_t gflag_Uart2Bus = WLUsartIdle;
 
 uint32_t gI2cErrorCount = 0;
 
@@ -32,8 +33,8 @@ int info_atomic_read_s32(int *ptr)
 static void Info_I2cBusyHandler(void)
 {
     if (gI2cErrorCount > 100) {
-        if (gflag_I2cRrror == WLStatusOff) {
-            gflag_I2cRrror = WLStatusOn;
+        if (gflag_I2cError == WLStatusOff) {
+            gflag_I2cError = WLStatusOn;
             gI2cErrorCount = 0;
             LOG_ERROR("I2C busy too many times, ret:%d", WL_ERR65537);
         } else {

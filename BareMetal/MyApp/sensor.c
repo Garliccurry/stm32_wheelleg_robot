@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "log.h"
 #include "tim.h"
-#include "motion.h"
+#include "sensor.h"
 #include "cirbuf.h"
 #include "driver_as5600.h"
 #include "driver_mpu6050.h"
@@ -26,7 +26,7 @@ static MpuRawData_t *gMpuRawDataBuf = NULL;
 static CirBuf_t      gCirAsRawBuff = {0};
 static CirBuf_t      gCirMpuRawBuff = {0};
 
-void Motion_SetSensorGetFre(uint32_t frequency)
+void Sensor_SetSensorGetFre(uint32_t frequency)
 {
     if (frequency > MAX_FREQUENCY_TIM2) {
         frequency = MAX_FREQUENCY_TIM2;
@@ -35,7 +35,7 @@ void Motion_SetSensorGetFre(uint32_t frequency)
     LOG_INFO("The update frequency of the sensor is %dhz", frequency);
 }
 
-static void Motion_StartGetAS5600(void)
+static void Sensor_StartGetAS5600(void)
 {
     ATOMIC_WRITE(&gBus, (uint8_t)BusA);
     uint32_t status = HAL_OK;
@@ -45,10 +45,10 @@ static void Motion_StartGetAS5600(void)
         gI2cErrorCount++;
         return;
     }
-    gflag_I2cRrror = WLStatusOff;
+    gflag_I2cError = WLStatusOff;
 }
 
-static void Motion_StartGetMPU6050(void)
+static void Sensor_StartGetMPU6050(void)
 {
     ATOMIC_WRITE(&gBus, (uint8_t)BusM);
     uint32_t status = HAL_OK;
@@ -57,18 +57,18 @@ static void Motion_StartGetMPU6050(void)
         gI2cErrorCount++;
         return;
     }
-    gflag_I2cRrror = WLStatusOff;
+    gflag_I2cError = WLStatusOff;
 }
-void Motion_TimerGetSensor(void) // 定时器周期回调
+void Sensor_TimerGetSensor(void) // 定时器周期回调
 {
     static uint32_t TIM2base_cnt = 0;
     static uint8_t  change_flag = 0;
     if (TIM2base_cnt == gPrescale) {
         if (change_flag == 0) {
-            Motion_StartGetAS5600();
+            Sensor_StartGetAS5600();
             change_flag = 1;
         } else {
-            Motion_StartGetMPU6050();
+            Sensor_StartGetMPU6050();
             change_flag = 0;
         }
         TIM2base_cnt = 0;
@@ -76,7 +76,7 @@ void Motion_TimerGetSensor(void) // 定时器周期回调
     TIM2base_cnt++;
 }
 
-void Motion_GetSensorCallback(I2C_HandleTypeDef *hi2c) // i2c mem中断回调
+void Sensor_GetSensorCallback(I2C_HandleTypeDef *hi2c) // i2c mem中断回调
 {
     static uint8_t AsCount = 0;
     static uint8_t BusStatus = 0;
@@ -97,7 +97,7 @@ void Motion_GetSensorCallback(I2C_HandleTypeDef *hi2c) // i2c mem中断回调
     }
 }
 
-void Motion_GetFocData(void)
+void Sensor_GetFocData(void)
 {
     static uint16_t shaft_raw_angle_L, shaft_raw_angle_R;
     static float    shaft_angle_L, shaft_angle_R;
@@ -111,7 +111,7 @@ void Motion_GetFocData(void)
     }
 }
 
-void Motion_GetMpuData(void)
+void Sensor_GetMpuData(void)
 {
     static MpuRawData_t rawdata;
     if (CirBuf_MpuDataRead(&gCirMpuRawBuff, &rawdata) == WL_OK) {
@@ -120,7 +120,7 @@ void Motion_GetMpuData(void)
     }
 }
 
-void Motion_Init(void)
+void Sensor_Init(void)
 {
     MPU6050_Init();
     AS5600_Init();
