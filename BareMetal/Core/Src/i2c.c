@@ -224,9 +224,9 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *i2cHandle)
 }
 
 /* USER CODE BEGIN 1 */
-#include "motion.h"
+#include "sensor.h"
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-    Motion_GetSensorCallback(hi2c);
+    Sensor_GetSensorCallback(hi2c);
 }
 /* USER CODE END 1 */

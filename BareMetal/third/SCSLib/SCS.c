@@ -1,348 +1,350 @@
 /*
  * SCS.c
- * SCS´®ÐÐ¶æ»úÐ­Òé³ÌÐò
- * ÈÕÆÚ: 2025.3.3
- * ×÷Õß: txl
+ * SCSï¿½ï¿½ï¿½Ð¶ï¿½ï¿½Ð­ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½: 2025.3.3
+ * ï¿½ï¿½ï¿½ï¿½: txl
  */
 
 #include "INST.h"
 #include "SCS.h"
 
-static uint8_t Level =1;//¶æ»ú·µ»ØµÈ¼¶1,Ä¬ÈÏÐ´Ö¸Áî¿ªÆôÓ¦´ð
-static uint8_t End = 0;//´¦ÀíÆ÷´óÐ¡¶Ë½á¹¹,Ä¬ÈÏÐ¡¶Ë´æ´¢¸ñÊ½
-static uint8_t u8Status;//¶æ»ú×´Ì¬
-static uint8_t u8Error;//Í¨ÐÅ×´Ì¬
+static uint8_t Level = 1; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ØµÈ¼ï¿½1,Ä¬ï¿½ï¿½Ð´Ö¸ï¿½î¿ªï¿½ï¿½Ó¦ï¿½ï¿½
+static uint8_t End = 0;   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½Ë½á¹¹,Ä¬ï¿½ï¿½Ð¡ï¿½Ë´æ´¢ï¿½ï¿½Ê½
+static uint8_t u8Status;  //ï¿½ï¿½ï¿½×´Ì¬
+static uint8_t u8Error;   //Í¨ï¿½ï¿½×´Ì¬
 
 void setEnd(uint8_t _End)
 {
-	End = _End;
+    End = _End;
 }
 
 uint8_t getEnd(void)
 {
-	return End;
+    return End;
 }
 
 void setLevel(uint8_t _Level)
 {
-	Level = _Level;
+    Level = _Level;
 }
 
 int getState(void)
 {
-	return u8Status;
+    return u8Status;
 }
 
 int getLastError(void)
 {
-	return u8Error;
+    return u8Error;
 }
 
-//1¸ö16Î»Êý²ð·ÖÎª2¸ö8Î»Êý
-//DataLÎªµÍÎ»£¬DataHÎª¸ßÎ»
-void Host2SCS(uint8_t *DataL, uint8_t* DataH, int Data)
+// 1ï¿½ï¿½16Î»ï¿½ï¿½ï¿½ï¿½ï¿½Îª2ï¿½ï¿½8Î»ï¿½ï¿½
+// DataLÎªï¿½ï¿½Î»ï¿½ï¿½DataHÎªï¿½ï¿½Î»
+void Host2SCS(uint8_t *DataL, uint8_t *DataH, int Data)
 {
-	if(End){
-		*DataL = (Data>>8);
-		*DataH = (Data&0xff);
-	}else{
-		*DataH = (Data>>8);
-		*DataL = (Data&0xff);
-	}
+    if (End) {
+        *DataL = (Data >> 8);
+        *DataH = (Data & 0xff);
+    } else {
+        *DataH = (Data >> 8);
+        *DataL = (Data & 0xff);
+    }
 }
 
-//2¸ö8Î»Êý×éºÏÎª1¸ö16Î»Êý
-//DataLÎªµÍÎ»£¬DataHÎª¸ßÎ»
+// 2ï¿½ï¿½8Î»ï¿½ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½16Î»ï¿½ï¿½
+// DataLÎªï¿½ï¿½Î»ï¿½ï¿½DataHÎªï¿½ï¿½Î»
 int SCS2Host(uint8_t DataL, uint8_t DataH)
 {
-	int Data;
-	if(End){
-		Data = DataL;
-		Data<<=8;
-		Data |= DataH;
-	}else{
-		Data = DataH;
-		Data<<=8;
-		Data |= DataL;
-	}
-	return Data;
+    int Data;
+    if (End) {
+        Data = DataL;
+        Data <<= 8;
+        Data |= DataH;
+    } else {
+        Data = DataH;
+        Data <<= 8;
+        Data |= DataL;
+    }
+    return Data;
 }
 
 void writeBuf(uint8_t ID, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen, uint8_t Fun)
 {
-	uint8_t i;
-	uint8_t msgLen = 2;
-	uint8_t bBuf[6];
-	uint8_t CheckSum = 0;
-	bBuf[0] = 0xff;
-	bBuf[1] = 0xff;
-	bBuf[2] = ID;
-	bBuf[4] = Fun;
-	if(nDat){
-		msgLen += nLen + 1;
-		bBuf[3] = msgLen;
-		bBuf[5] = MemAddr;
-		writeSCS(bBuf, 6);
-		
-	}else{
-		bBuf[3] = msgLen;
-		writeSCS(bBuf, 5);
-	}
-	CheckSum = ID + msgLen + Fun + MemAddr;
-	if(nDat){
-		for(i=0; i<nLen; i++){
-			CheckSum += nDat[i];
-		}
-		writeSCS(nDat, nLen);
-	}
-	CheckSum = ~CheckSum;
-	writeSCS(&CheckSum, 1);
+    uint8_t i;
+    uint8_t msgLen = 2;
+    uint8_t bBuf[6];
+    uint8_t CheckSum = 0;
+    bBuf[0] = 0xff;
+    bBuf[1] = 0xff;
+    bBuf[2] = ID;
+    bBuf[4] = Fun;
+    if (nDat) {
+        msgLen += nLen + 1;
+        bBuf[3] = msgLen;
+        bBuf[5] = MemAddr;
+        writeSCS(bBuf, 6);
+
+    } else {
+        bBuf[3] = msgLen;
+        writeSCS(bBuf, 5);
+    }
+    CheckSum = ID + msgLen + Fun + MemAddr;
+    if (nDat) {
+        for (i = 0; i < nLen; i++) {
+            CheckSum += nDat[i];
+        }
+        writeSCS(nDat, nLen);
+    }
+    CheckSum = ~CheckSum;
+    writeSCS(&CheckSum, 1);
 }
 
-//ÆÕÍ¨Ð´Ö¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬Ð´ÈëÊý¾Ý£¬Ð´Èë³¤¶È
+//ï¿½ï¿½Í¨Ð´Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½Ð´ï¿½ë³¤ï¿½ï¿½
 int genWrite(uint8_t ID, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen)
 {
-	rFlushSCS();
-	writeBuf(ID, MemAddr, nDat, nLen, INST_WRITE);
-	wFlushSCS();
-	return Ack(ID);
+    rFlushSCS();
+    writeBuf(ID, MemAddr, nDat, nLen, INST_WRITE);
+    wFlushSCS();
+    return Ack(ID);
 }
 
-//Òì²½Ð´Ö¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬Ð´ÈëÊý¾Ý£¬Ð´Èë³¤¶È
+//ï¿½ì²½Ð´Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½Ð´ï¿½ë³¤ï¿½ï¿½
 int regWrite(uint8_t ID, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen)
 {
-	rFlushSCS();
-	writeBuf(ID, MemAddr, nDat, nLen, INST_REG_WRITE);
-	wFlushSCS();
-	return Ack(ID);
+    rFlushSCS();
+    writeBuf(ID, MemAddr, nDat, nLen, INST_REG_WRITE);
+    wFlushSCS();
+    return Ack(ID);
 }
 
-//Òì²½Ð´Ö´ÐÐÐÐ
+//ï¿½ì²½Ð´Ö´ï¿½ï¿½ï¿½ï¿½
 int regAction(uint8_t ID)
 {
-	rFlushSCS();
-	writeBuf(ID, 0, NULL, 0, INST_REG_ACTION);
-	wFlushSCS();
-	return Ack(ID);
+    rFlushSCS();
+    writeBuf(ID, 0, NULL, 0, INST_REG_ACTION);
+    wFlushSCS();
+    return Ack(ID);
 }
-
-//Í¬²½Ð´Ö¸Áî
-//¶æ»úID[]Êý×é£¬IDNÊý×é³¤¶È£¬MemAddrÄÚ´æ±íµØÖ·£¬Ð´ÈëÊý¾Ý£¬Ð´Èë³¤¶È
+#define WL_OK 0
+//Í¬ï¿½ï¿½Ð´Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½ID[]ï¿½ï¿½ï¿½é£¬IDNï¿½ï¿½ï¿½é³¤ï¿½È£ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½Ð´ï¿½ë³¤ï¿½ï¿½
 void syncWrite(uint8_t ID[], uint8_t IDN, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen)
 {
-	uint8_t mesLen = ((nLen+1)*IDN+4);
-	uint8_t Sum = 0;
-	uint8_t bBuf[7];
-	uint8_t i, j;
-	
-	bBuf[0] = 0xff;
-	bBuf[1] = 0xff;
-	bBuf[2] = 0xfe;
-	bBuf[3] = mesLen;
-	bBuf[4] = INST_SYNC_WRITE;
-	bBuf[5] = MemAddr;
-	bBuf[6] = nLen;
-	
-	rFlushSCS();
-	writeSCS(bBuf, 7);
+    uint8_t mesLen = ((nLen + 1) * IDN + 4);
+    uint8_t Sum = 0;
+    uint8_t bBuf[7];
+    uint8_t i, j;
 
-	Sum = 0xfe + mesLen + INST_SYNC_WRITE + MemAddr + nLen;
+    bBuf[0] = 0xff;
+    bBuf[1] = 0xff;
+    bBuf[2] = 0xfe;
+    bBuf[3] = mesLen;
+    bBuf[4] = INST_SYNC_WRITE;
+    bBuf[5] = MemAddr;
+    bBuf[6] = nLen;
 
-	for(i=0; i<IDN; i++){
-		writeSCS(&ID[i], 1);
-		writeSCS(nDat+i*nLen, nLen);
-		Sum += ID[i];
-		for(j=0; j<nLen; j++){
-			Sum += nDat[i*nLen+j];
-		}
-	}
-	Sum = ~Sum;
-	writeSCS(&Sum, 1);
-	wFlushSCS();
+    if (rFlushSCS() != WL_OK) {
+        return;
+    }
+    writeSCS(bBuf, 7);
+
+    Sum = 0xfe + mesLen + INST_SYNC_WRITE + MemAddr + nLen;
+
+    for (i = 0; i < IDN; i++) {
+        writeSCS(&ID[i], 1);
+        writeSCS(nDat + i * nLen, nLen);
+        Sum += ID[i];
+        for (j = 0; j < nLen; j++) {
+            Sum += nDat[i * nLen + j];
+        }
+    }
+    Sum = ~Sum;
+    writeSCS(&Sum, 1);
+    wFlushSCS();
 }
 
 int writeByte(uint8_t ID, uint8_t MemAddr, uint8_t bDat)
 {
-	rFlushSCS();
-	writeBuf(ID, MemAddr, &bDat, 1, INST_WRITE);
-	wFlushSCS();
-	return Ack(ID);
+    rFlushSCS();
+    writeBuf(ID, MemAddr, &bDat, 1, INST_WRITE);
+    wFlushSCS();
+    return Ack(ID);
 }
 
 int writeWord(uint8_t ID, uint8_t MemAddr, uint16_t wDat)
 {
-	uint8_t buf[2];
-	Host2SCS(buf+0, buf+1, wDat);
-	rFlushSCS();
-	writeBuf(ID, MemAddr, buf, 2, INST_WRITE);
-	wFlushSCS();
-	return Ack(ID);
+    uint8_t buf[2];
+    Host2SCS(buf + 0, buf + 1, wDat);
+    rFlushSCS();
+    writeBuf(ID, MemAddr, buf, 2, INST_WRITE);
+    wFlushSCS();
+    return Ack(ID);
 }
 
-//¶ÁÖ¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬·µ»ØÊý¾ÝnData£¬Êý¾Ý³¤¶ÈnLen
+//ï¿½ï¿½Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½nDataï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½nLen
 int Read(uint8_t ID, uint8_t MemAddr, uint8_t *nData, uint8_t nLen)
 {
-	int Size;
-	uint8_t bBuf[4];
-	uint8_t calSum;
-	uint8_t i;
-	rFlushSCS();
-	writeBuf(ID, MemAddr, &nLen, 1, INST_READ);
-	wFlushSCS();
-	u8Error = 0;
-	if(!checkHead()){
-		u8Error = SCS_ERR_NO_REPLY;
-		return 0;
-	}
-	if(readSCS(bBuf, 3)!=3){
-		u8Error = SCS_ERR_NO_REPLY;
-		return 0;
-	}
-	if(bBuf[0]!=ID && ID!=0xfe){
-		u8Error = SCS_ERR_SLAVE_ID;
-		return 0;
-	}
-	if(bBuf[1]!=(nLen+2)){
-		u8Error = SCS_ERR_BUFF_LEN;
-		return 0;
-	}
-	Size = readSCS(nData, nLen);
-	if(Size!=nLen){
-		u8Error = SCS_ERR_NO_REPLY;
-		return 0;
-	}
-	if(readSCS(bBuf+3, 1)!=1){
-		u8Error = SCS_ERR_NO_REPLY;
-		return 0;
-	}
-	calSum = bBuf[0]+bBuf[1]+bBuf[2];
-	for(i=0; i<Size; i++){
-		calSum += nData[i];
-	}
-	calSum = ~calSum;
-	if(calSum!=bBuf[3]){
-		u8Error = SCS_ERR_CRC_CMP;
-		return 0;
-	}
-	u8Status = bBuf[2];
-	return Size;
+    int     Size;
+    uint8_t bBuf[4];
+    uint8_t calSum;
+    uint8_t i;
+    rFlushSCS();
+    writeBuf(ID, MemAddr, &nLen, 1, INST_READ);
+    wFlushSCS();
+    u8Error = 0;
+    if (!checkHead()) {
+        u8Error = SCS_ERR_NO_REPLY;
+        return 0;
+    }
+    if (readSCS(bBuf, 3) != 3) {
+        u8Error = SCS_ERR_NO_REPLY;
+        return 0;
+    }
+    if (bBuf[0] != ID && ID != 0xfe) {
+        u8Error = SCS_ERR_SLAVE_ID;
+        return 0;
+    }
+    if (bBuf[1] != (nLen + 2)) {
+        u8Error = SCS_ERR_BUFF_LEN;
+        return 0;
+    }
+    Size = readSCS(nData, nLen);
+    if (Size != nLen) {
+        u8Error = SCS_ERR_NO_REPLY;
+        return 0;
+    }
+    if (readSCS(bBuf + 3, 1) != 1) {
+        u8Error = SCS_ERR_NO_REPLY;
+        return 0;
+    }
+    calSum = bBuf[0] + bBuf[1] + bBuf[2];
+    for (i = 0; i < Size; i++) {
+        calSum += nData[i];
+    }
+    calSum = ~calSum;
+    if (calSum != bBuf[3]) {
+        u8Error = SCS_ERR_CRC_CMP;
+        return 0;
+    }
+    u8Status = bBuf[2];
+    return Size;
 }
 
-//¶Á1×Ö½Ú£¬³¬Ê±·µ»Ø-1
+//ï¿½ï¿½1ï¿½Ö½Ú£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int readByte(uint8_t ID, uint8_t MemAddr)
 {
-	uint8_t bDat;
-	int Size = Read(ID, MemAddr, &bDat, 1);
-	if(Size!=1){
-		return -1;
-	}else{
-		return bDat;
-	}
+    uint8_t bDat;
+    int     Size = Read(ID, MemAddr, &bDat, 1);
+    if (Size != 1) {
+        return -1;
+    } else {
+        return bDat;
+    }
 }
 
-//¶Á2×Ö½Ú£¬³¬Ê±·µ»Ø-1
+//ï¿½ï¿½2ï¿½Ö½Ú£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int readWord(uint8_t ID, uint8_t MemAddr)
-{	
-	uint8_t nDat[2];
-	int Size;
-	uint16_t wDat;
-	Size = Read(ID, MemAddr, nDat, 2);
-	if(Size!=2)
-		return -1;
-	wDat = SCS2Host(nDat[0], nDat[1]);
-	return wDat;
+{
+    uint8_t  nDat[2];
+    int      Size;
+    uint16_t wDat;
+    Size = Read(ID, MemAddr, nDat, 2);
+    if (Size != 2)
+        return -1;
+    wDat = SCS2Host(nDat[0], nDat[1]);
+    return wDat;
 }
 
-//PingÖ¸Áî£¬·µ»Ø¶æ»úID£¬³¬Ê±·µ»Ø-1
-int	Ping(uint8_t ID)
+// PingÖ¸ï¿½î£¬ï¿½ï¿½ï¿½Ø¶ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
+int Ping(uint8_t ID)
 {
-	uint8_t bBuf[4];
-	uint8_t calSum;
-	rFlushSCS();
-	writeBuf(ID, 0, NULL, 0, INST_PING);
-	wFlushSCS();
-	u8Status = 0;
-	if(!checkHead()){
-		u8Error = SCS_ERR_NO_REPLY;
-		return -1;
-	}
-	u8Error = 0;
-	if(readSCS(bBuf, 4)!=4){
-		u8Error = SCS_ERR_NO_REPLY;
-		return -1;
-	}
-	if(bBuf[0]!=ID && ID!=0xfe){
-		u8Error = SCS_ERR_SLAVE_ID;
-		return -1;
-	}
-	if(bBuf[1]!=2){
-		u8Error = SCS_ERR_BUFF_LEN;
-		return -1;
-	}
-	calSum = ~(bBuf[0]+bBuf[1]+bBuf[2]);
-	if(calSum!=bBuf[3]){
-		u8Error = SCS_ERR_CRC_CMP;
-		return -1;			
-	}
-	u8Status = bBuf[2];
-	return bBuf[0];
+    uint8_t bBuf[4];
+    uint8_t calSum;
+    rFlushSCS();
+    writeBuf(ID, 0, NULL, 0, INST_PING);
+    wFlushSCS();
+    u8Status = 0;
+    if (!checkHead()) {
+        u8Error = SCS_ERR_NO_REPLY;
+        return -1;
+    }
+    u8Error = 0;
+    if (readSCS(bBuf, 4) != 4) {
+        u8Error = SCS_ERR_NO_REPLY;
+        return -1;
+    }
+    if (bBuf[0] != ID && ID != 0xfe) {
+        u8Error = SCS_ERR_SLAVE_ID;
+        return -1;
+    }
+    if (bBuf[1] != 2) {
+        u8Error = SCS_ERR_BUFF_LEN;
+        return -1;
+    }
+    calSum = ~(bBuf[0] + bBuf[1] + bBuf[2]);
+    if (calSum != bBuf[3]) {
+        u8Error = SCS_ERR_CRC_CMP;
+        return -1;
+    }
+    u8Status = bBuf[2];
+    return bBuf[0];
 }
 
 int checkHead(void)
 {
-	uint8_t bDat;
-	uint8_t bBuf[2] = {0, 0};
-	uint8_t Cnt = 0;
-	while(1){
-		if(!readSCS(&bDat, 1)){
-			return 0;
-		}
-		bBuf[1] = bBuf[0];
-		bBuf[0] = bDat;
-		if(bBuf[0]==0xff && bBuf[1]==0xff){
-			break;
-		}
-		Cnt++;
-		if(Cnt>10){
-			return 0;
-		}
-	}
-	return 1;
+    uint8_t bDat;
+    uint8_t bBuf[2] = {0, 0};
+    uint8_t Cnt = 0;
+    while (1) {
+        if (!readSCS(&bDat, 1)) {
+            return 0;
+        }
+        bBuf[1] = bBuf[0];
+        bBuf[0] = bDat;
+        if (bBuf[0] == 0xff && bBuf[1] == 0xff) {
+            break;
+        }
+        Cnt++;
+        if (Cnt > 10) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
-//Ö¸ÁîÓ¦´ð
-int	Ack(uint8_t ID)
+//Ö¸ï¿½ï¿½Ó¦ï¿½ï¿½
+int Ack(uint8_t ID)
 {
-	uint8_t bBuf[4];
-	uint8_t calSum;
-	u8Error = 0;
-	if(ID!=0xfe && Level){
-		if(!checkHead()){
-			u8Error = SCS_ERR_NO_REPLY;
-			return 0;
-		}
-		u8Status = 0;
-		if(readSCS(bBuf, 4)!=4){
-			u8Error = SCS_ERR_NO_REPLY;
-			return 0;
-		}
-		if(bBuf[0]!=ID){
-			u8Error = SCS_ERR_SLAVE_ID;
-			return 0;
-		}
-		if(bBuf[1]!=2){
-			u8Error = SCS_ERR_BUFF_LEN;
-			return 0;
-		}
-		calSum = ~(bBuf[0]+bBuf[1]+bBuf[2]);
-		if(calSum!=bBuf[3]){
-			u8Error = SCS_ERR_CRC_CMP;
-			return 0;			
-		}
-		u8Status = bBuf[2];
-	}
-	return 1;
+    uint8_t bBuf[4];
+    uint8_t calSum;
+    u8Error = 0;
+    if (ID != 0xfe && Level) {
+        if (!checkHead()) {
+            u8Error = SCS_ERR_NO_REPLY;
+            return 0;
+        }
+        u8Status = 0;
+        if (readSCS(bBuf, 4) != 4) {
+            u8Error = SCS_ERR_NO_REPLY;
+            return 0;
+        }
+        if (bBuf[0] != ID) {
+            u8Error = SCS_ERR_SLAVE_ID;
+            return 0;
+        }
+        if (bBuf[1] != 2) {
+            u8Error = SCS_ERR_BUFF_LEN;
+            return 0;
+        }
+        calSum = ~(bBuf[0] + bBuf[1] + bBuf[2]);
+        if (calSum != bBuf[3]) {
+            u8Error = SCS_ERR_CRC_CMP;
+            return 0;
+        }
+        u8Status = bBuf[2];
+    }
+    return 1;
 }

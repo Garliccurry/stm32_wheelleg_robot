@@ -58,24 +58,39 @@ typedef struct
     uint32_t Gvel_angle_pre_timestamp;
 } AsData_t;
 
+typedef struct
+{
+    uint8_t  ID[2];
+    uint16_t position[2];
+    uint16_t time[2];
+    uint16_t speed[2];
+} SCSData_t;
+
 typedef enum {
     WLStatusIdle = 0,
     WLStatusAct = 1,
     WLStatusOn,
     WLStatusOff,
-
 } WlFlagStatus;
+
+typedef enum {
+    WLUsartIdle = 0,
+    WLUsartSend,
+    WLUsartRecv,
+    WLUsartBottom,
+} WlUsart2Flag;
 
 typedef enum {
     WL_ERRINIT = 65536, // Error code for placeholder
     WL_ERR65537,        // can not get battery voltage
     WL_ERR65538,        // I2c was interrupted for some reason(eg. burning), causing a hardware deadlock
-    WL_ERR65539,
+    WL_ERR65539,        // waiting for SCS serial bus timeout
 } WlErrorCode;
 
 extern uint8_t gflag_UsartRec;
 extern uint8_t gflag_FatalErr;
-extern uint8_t gflag_I2cRrror;
+extern uint8_t gflag_I2cError;
+extern uint8_t gflag_Uart2Bus;
 
 extern uint32_t gI2cErrorCount;
 

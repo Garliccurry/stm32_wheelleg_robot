@@ -19,7 +19,7 @@
         "foc.h": "c",
         "math.h": "c",
         "info.h": "c",
-        "motion.h": "c",
+        "sensor.h": "c",
         "driver_as5600.h": "c",
         "string_view": "c",
         "i2c.h": "c",
@@ -33,7 +33,10 @@
         "type_traits": "c",
         "utility": "c",
         "ostream": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "scs.h": "c",
+        "inst.h": "c",
+        "softtimer.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.formatting": "clangFormat",

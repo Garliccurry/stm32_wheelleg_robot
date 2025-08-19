@@ -46,13 +46,13 @@ void MX_USART1_UART_Init(void);
 void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-extern uint8_t g_rx_buf[RX_BUF_SIZE];
+extern uint8_t gRxBuff[RX_BUF_SIZE];
 
-void Usart_LogPrint(uint8_t *ch, uint16_t len);
-void Uart_ParseCommand(void);
-void FTUart_Send(uint8_t *nDat, int nLen);
-int  FTUart_Read(uint8_t *nDat, int nLen);
-void FTBus_Delay(void);
+void     Usart_LogPrint(uint8_t *ch, uint16_t len);
+void     Uart_ParseCommand(void);
+void     FTUart_Send(uint8_t *nDat, int nLen);
+int      FTUart_Read(uint8_t *nDat, int nLen);
+uint32_t FTBus_Delay(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

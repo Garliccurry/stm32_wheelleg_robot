@@ -10,9 +10,9 @@
 static uint8_t wBuf[128];
 static uint8_t wLen = 0;
 
-void ftUart_Send(uint8_t *nDat, int nLen);
-int  ftUart_Read(uint8_t *nDat, int nLen);
-void ftBus_Delay(void);
+void     ftUart_Send(uint8_t *nDat, int nLen);
+int      ftUart_Read(uint8_t *nDat, int nLen);
+uint32_t ftBus_Delay(void);
 
 // UART �������ݽӿ�
 int readSCS(unsigned char *nDat, int nLen)
@@ -34,13 +34,13 @@ int writeSCS(unsigned char *nDat, int nLen)
 }
 
 //���ջ�����ˢ��
-void rFlushSCS()
+uint32_t rFlushSCS(void)
 {
-    FTBus_Delay();
+    return FTBus_Delay();
 }
 
 //���ͻ�����ˢ��
-void wFlushSCS()
+void wFlushSCS(void)
 {
     if (wLen) {
         FTUart_Send(wBuf, wLen);
