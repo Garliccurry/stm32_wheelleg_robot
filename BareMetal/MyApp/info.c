@@ -32,6 +32,7 @@ int info_atomic_read_s32(int *ptr)
 
 static void Info_I2cBusyHandler(void)
 {
+    // TODO 重新初始化有问题
     if (gI2cErrorCount > 100) {
         if (gflag_I2cError == WLStatusOff) {
             gflag_I2cError = WLStatusOn;
