@@ -30,7 +30,6 @@
 #include "battery.h"
 #include "log.h"
 #include "foc.h"
-#include "SCSCL.h"
 #include "sensor.h"
 #include "softtimer.h"
 #include "driver_mpu6050.h"
@@ -118,29 +117,18 @@ int main(void)
 
     SoftwareTimer_Init();
 
-    uint32_t  time = 0, pre_time = 0;
-    SCSData_t scsdata = {
-        .ID[0] = 1,
-        .ID[1] = 2,
-        .position[0] = 2048,
-        .position[1] = 2048,
-        .time[0] = 0,
-        .time[1] = 0,
-        .speed[0] = 1500,
-        .speed[1] = 1500,
-    };
+    uint32_t time = 0, pre_time = 0;
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1) {
         /* USER CODE END WHILE */
+
         /* USER CODE BEGIN 3 */
         Sensor_GetMpuData();
         Sensor_GetFocData();
         Info_ProcessAffair();
-
-        SyncWritePos(scsdata.ID, 2, scsdata.position, scsdata.time, scsdata.speed);
 
         HAL_Delay(1000);
     }

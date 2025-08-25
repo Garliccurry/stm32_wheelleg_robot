@@ -26,7 +26,7 @@ void SoftwareTimer_Init(void)
     memset(timers, 0, sizeof(timers));
     timerCount = 0;
 
-    uint8_t timer1 = SoftwareTimer_Create(1000, SoftwareTimer_test, WL_OK);
+    uint8_t timer1 = SoftwareTimer_Create(250, Info_TimerCallback, WL_OK);
     SoftwareTimer_Start(timer1);
 }
 
