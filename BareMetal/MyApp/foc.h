@@ -6,7 +6,7 @@
 #include "pid.h"
 #include "filter.h"
 
-#define constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
+#define CONSTRAIN(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
 
 #define _2_SQRT3 1.15470053838f
 #define _SQRT3   1.73205080757f

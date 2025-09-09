@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "[1.0.0-编译代码]Compile all STM32 project",
+            "label": "[1.0.0-编译代码]Compile All STM32 project",
             "type": "shell",
             "command": "make",
             "problemMatcher": []
@@ -28,6 +28,13 @@
                 "panel": "dedicated",
                 "clear": true
             }
-        }
+        },
+        
+        {
+            "label": "[3.0.0-删除文件]Delete All Temp File",
+            "type": "shell",
+            "command": "make clean",
+            "problemMatcher": []
+        },
     ]
 }

@@ -26,8 +26,8 @@ typedef enum {
 I2cDevice_t      *AS5600_GetHandle(AS5600Dir dir);
 void              AS5600_Init(void);
 HAL_StatusTypeDef AS5600_ReadData(I2cDevice_t *dev, uint8_t *data);
-float             AS5600_GetAng(uint16_t raw_data);
-float             AS5600_GetVel(AsData_t *as5600);
+float             AS5600_GetAngFromRaw(uint16_t raw_data);
+void              AS5600_GetVel(AsData_t *as5600);
 void              AS5600_AngleUpdate(AsData_t *asdata, float angle);
 // void AS5600_AngleUpdate(AsData_t *as5600, float angle);
 #endif

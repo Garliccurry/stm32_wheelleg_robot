@@ -255,7 +255,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
             for (int i = 0; i < RX_BUF_SIZE; i++) {
                 gCommand[i] = gRxBuff[i];
             }
-            gflag_UsartRec = WLStatusAct;
+            g_flagUsartRec = WLR_StatusAct;
         }
         HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
     }
@@ -266,7 +266,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     if (huart->Instance == USART1) {
         // return;
     } else if (huart->Instance == USART2) {
-        gflag_Uart2Bus = WLUsartIdle;
+        g_flagUart2Bus = WLR_UsartIdle;
     }
 }
 
@@ -277,7 +277,7 @@ void Usart_LogPrint(uint8_t *ch, uint16_t len)
 
 void Uart_ParseCommand(void)
 {
-    if (gflag_UsartRec == WLStatusAct) {
+    if (g_flagUsartRec == WLR_StatusAct) {
         // if (gCommand[0] == 0x31) {
         //     pos_left += 6;
         // } else if (gCommand[3] == 0x32) {
@@ -303,7 +303,7 @@ void Uart_ParseCommand(void)
         default:
             break;
         }
-        gflag_UsartRec = WLStatusIdle;
+        g_flagUsartRec = WLR_StatusIdle;
     }
 }
 
@@ -311,6 +311,9 @@ void FTUart_Send(uint8_t *nDat, int nLen)
 {
     // HAL_UART_Transmit(&huart2, nDat, nLen, 100);
     HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&huart2, nDat, nLen);
+    if (status != HAL_OK) {
+        LOG_ERROR("Leggel usart2 COM send error");
+    }
     // LOG_DEBUG("start send uart2, status=%d", status);
 }
 
@@ -327,13 +330,13 @@ uint32_t FTBus_Delay(void)
 {
     // HAL_Delay(1);
     uint32_t i = 0;
-    while (gflag_Uart2Bus != WLUsartIdle) {
+    while (g_flagUart2Bus != WLR_UsartIdle) {
         i++;
         if (i > 100) {
-            LOG_ERROR("waiting for SCS serial bus timeout, ret:%d", WL_ERR65539);
-            return WL_ERR65539;
+            LOG_ERROR("waiting for SCS serial bus timeout, ret:%d", WLR_ERR65539);
+            return WLR_ERR65539;
         }
     }
-    return WL_OK;
+    return WLR_OK;
 }
 /* USER CODE END 1 */
