@@ -4,8 +4,6 @@
 #include "log.h"
 #include "driver_as5600.h"
 
-static PID_TypeDef g_Vpid_L, g_Vpid_R, g_Ppid_L, g_Ppid_R;
-
 void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
                    TIM_HandleTypeDef *htim_L,
                    TIM_HandleTypeDef *htim_R,
@@ -19,15 +17,15 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
     m_L->htim = htim_L;
     m_R->htim = htim_R;
 
-    PID_Init(&g_Vpid_L, 1, 0.003, 0.1, 0, 1000, 40);
-    PID_Init(&g_Vpid_R, -1, 0.003, 0.1, 0, 1000, 40);
-    m_L->pid_vel = &g_Vpid_L;
-    m_R->pid_vel = &g_Vpid_R;
+    // PID_Init(&g_Vpid_L, 1, 0.003, 0.1, 0, 1000, 40);
+    // PID_Init(&g_Vpid_R, -1, 0.003, 0.1, 0, 1000, 40);
+    // m_L->pid_vel = &g_Vpid_L;
+    // m_R->pid_vel = &g_Vpid_R;
 
-    PID_Init(&g_Ppid_L, 1, 0.1, 0, 0, 0, 0);
-    PID_Init(&g_Ppid_R, -1, 0.1, 0, 0, 0, 0);
-    m_L->pid_pos = &g_Ppid_L;
-    m_R->pid_pos = &g_Ppid_R;
+    // PID_Init(&g_Ppid_L, 1, 0.1, 0, 0, 0, 0);
+    // PID_Init(&g_Ppid_R, -1, 0.1, 0, 0, 0, 0);
+    // m_L->pid_pos = &g_Ppid_L;
+    // m_R->pid_pos = &g_Ppid_R;
 
     m_L->as_dev = as_dev_L;
     m_R->as_dev = as_dev_R;
@@ -81,7 +79,7 @@ void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr)
 //     AS5600_ReadData(m->as_dev, raw_angle);
 
 //     uint16_t angle = raw_angle[0] << 8 | raw_angle[1];
-//     angle_el = AS5600_GetAng(angle);
+//     angle_el = AS5600_GetAngFromRaw(angle);
 //     angle_el = Closeloop_ElecAngle(m, angle_el + m->Z_ElecAngle);
 //     float Ualpha = -Uq * sin(angle_el);
 //     float Ubeta = Uq * cos(angle_el);
@@ -90,9 +88,9 @@ void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr)
 //     float Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + m->Vpwr / 2;
 //     float Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + m->Vpwr / 2;
 
-//     float dc_a = constrain(Ua / m->Vpwr, 0.0f, 1.0f);
-//     float dc_b = constrain(Ub / m->Vpwr, 0.0f, 1.0f);
-//     float dc_c = constrain(Uc / m->Vpwr, 0.0f, 1.0f);
+//     float dc_a = CONSTRAIN(Ua / m->Vpwr, 0.0f, 1.0f);
+//     float dc_b = CONSTRAIN(Ub / m->Vpwr, 0.0f, 1.0f);
+//     float dc_c = CONSTRAIN(Uc / m->Vpwr, 0.0f, 1.0f);
 
 //     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_1, dc_a * 99);
 //     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_2, dc_b * 99);
@@ -109,9 +107,9 @@ void SetTorque(Motor_TypeDef *m, float Uq, float angle_el)
     float Ub = (sqrt(3) * Ubeta - Ualpha) / 2 + m->Vpwr / 2;
     float Uc = (-Ualpha - sqrt(3) * Ubeta) / 2 + m->Vpwr / 2;
 
-    float dc_a = constrain(Ua / m->Vpwr, 0.0f, 1.0f);
-    float dc_b = constrain(Ub / m->Vpwr, 0.0f, 1.0f);
-    float dc_c = constrain(Uc / m->Vpwr, 0.0f, 1.0f);
+    float dc_a = CONSTRAIN(Ua / m->Vpwr, 0.0f, 1.0f);
+    float dc_b = CONSTRAIN(Ub / m->Vpwr, 0.0f, 1.0f);
+    float dc_c = CONSTRAIN(Uc / m->Vpwr, 0.0f, 1.0f);
 
     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_1, dc_a * 99);
     __HAL_TIM_SetCompare(m->htim, TIM_CHANNEL_2, dc_b * 99);
@@ -129,13 +127,15 @@ void FOC_WheelBalance(Motor_TypeDef *m, float error, float angle)
 {
     SetTorque(m, error, Closeloop_ElecAngle(m, angle));
 }
+
 void FOC_PositionCloseloop(Motor_TypeDef *m, float motor_target, float angle, float rotation)
 {
     float Sensor_Angle, Kp = 0.001;
     Sensor_Angle = rotation * 6.28318530718f + angle;
-    SetTorque(m, constrain(-Kp * (motor_target - m->DIR * Sensor_Angle) * 180 / _PI, -6, 6), Closeloop_ElecAngle(m, Sensor_Angle));
+    SetTorque(m, CONSTRAIN(-Kp * (motor_target - m->DIR * Sensor_Angle) * 180 / _PI, -6, 6), Closeloop_ElecAngle(m, Sensor_Angle));
 }
 
+#ifdef TEST
 static float g_shaft_angle = 0;
 
 static float Openloop_ElecAngle(Motor_TypeDef *m, float angle)
@@ -152,3 +152,4 @@ void FOC_VelocityOpenLoop(Motor_TypeDef *m, float target_v)
     float Uq = V_POWER / 2;
     SetTorque(m, Uq, Openloop_ElecAngle(m, g_shaft_angle));
 }
+#endif

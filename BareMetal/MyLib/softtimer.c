@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "battery.h"
 #include "info.h"
 #include "log.h"
 
@@ -26,7 +27,9 @@ void SoftwareTimer_Init(void)
     memset(timers, 0, sizeof(timers));
     timerCount = 0;
 
-    uint8_t timer1 = SoftwareTimer_Create(250, Info_TimerCallback, WL_OK);
+    Battery_Init();
+
+    uint8_t timer1 = SoftwareTimer_Create(250, Info_TimerCallback, WLR_OK);
     SoftwareTimer_Start(timer1);
 }
 
@@ -34,11 +37,13 @@ void SoftwareTimer_Init(void)
 uint8_t SoftwareTimer_Create(uint32_t duration, TimerCallback callback, uint8_t isAutoReload)
 {
     if (timerCount >= MAX_SOFTWARE_TIMERS) {
-        return 0xFF; // 错误: 达到最大定时器数量
+        LOG_ERROR("Reaching the maximum number of timers");
+        return 0xFF;
     }
 
     if (duration == 0 || callback == NULL) {
-        return 0xFF; // 错误: 无效参数
+        LOG_ERROR("Invalid timer parameter");
+        return 0xFF;
     }
 
     timers[timerCount].duration = duration;
@@ -47,7 +52,7 @@ uint8_t SoftwareTimer_Create(uint32_t duration, TimerCallback callback, uint8_t 
     timers[timerCount].state = TimerStopped;
     timers[timerCount].startTime = 0;
 
-    return timerCount++; // 返回定时器ID
+    return timerCount++;
 }
 
 // 启动定时器
@@ -133,7 +138,7 @@ void SoftwareTimer_Update(void)
             }
 
             // 处理自动重载或停止
-            if (timers[i].isAutoReload == WL_OK) {
+            if (timers[i].isAutoReload == WLR_OK) {
                 timers[i].startTime = currentTime;
             } else {
                 timers[i].state = TimerStopped;

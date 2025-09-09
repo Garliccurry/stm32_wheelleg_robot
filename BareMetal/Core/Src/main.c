@@ -31,6 +31,7 @@
 #include "log.h"
 #include "foc.h"
 #include "sensor.h"
+#include "control.h"
 #include "softtimer.h"
 #include "driver_mpu6050.h"
 #include "driver_as5600.h"
@@ -108,16 +109,16 @@ int main(void)
     MX_TIM2_Init();
     /* USER CODE BEGIN 2 */
 
-    log_RegisterOutput(Usart_LogPrint);
-    log_SetFmt(0);
+    Log_RegisterOutput(Usart_LogPrint);
+    Log_SetFormat(0);
 
-    Battery_Init();
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff, RX_BUF_SIZE);
+
+    HAL_Delay(1000);
     Sensor_Init();
-
+    Control_Init();
     SoftwareTimer_Init();
-
-    uint32_t time = 0, pre_time = 0;
+    Info_Init();
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -128,9 +129,11 @@ int main(void)
         /* USER CODE BEGIN 3 */
         Sensor_GetMpuData();
         Sensor_GetFocData();
+
         Info_ProcessAffair();
 
         HAL_Delay(1000);
+        LOG_ERROR("Info_GetUsTick: %d", Info_GetUsTick());
     }
     /* USER CODE END 3 */
 }

@@ -1,19 +1,19 @@
 #include "log.h"
 
-static uint32_t      g_log_fmt = LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP | LOG_FMT_FUNC_LINE;
+static uint32_t      g_log_format = LOG_FMT_LEVEL_STR | LOG_FMT_TIME_STAMP | LOG_FMT_FUNC_LINE;
 static uint32_t      g_log_level = CONFIG_LOG_DEF_LEVEL;
 static logOutputFunc g_log_output = NULL;
 
 static void Get_SystemTime(char *time_buf, uint16_t buf_size, uint16_t *ms);
 
-void log_RegisterOutput(logOutputFunc func)
+void Log_RegisterOutput(logOutputFunc func)
 {
     g_log_output = func ? func : Usart_LogPrint;
 }
 
-void log_SetFmt(uint32_t fmt)
+void Log_SetFormat(uint32_t format)
 {
-    g_log_fmt = fmt;
+    g_log_format = format;
 }
 
 static void Get_SystemTime(char *time_buf, uint16_t buf_size, uint16_t *ms)
@@ -30,7 +30,7 @@ static void Get_SystemTime(char *time_buf, uint16_t buf_size, uint16_t *ms)
              (int)(hour % 24), (int)min, (int)sec);
 }
 
-void log_Print(uint32_t level, const char *func, uint32_t line, const char *fmt, ...)
+void Log_Print(uint32_t level, const char *func, uint32_t line, const char *format, ...)
 {
     if (level >= LOG_LEVEL_BOTTOM || level < g_log_level)
         return;
@@ -39,26 +39,26 @@ void log_Print(uint32_t level, const char *func, uint32_t line, const char *fmt,
     va_list args;
     int     idx = 0;
 
-    if (g_log_fmt & LOG_FMT_LEVEL_STR) {
+    if (g_log_format & LOG_FMT_LEVEL_STR) {
         static const char *level_str[] = {"DEBUG", "INFO ", "ERROR"};
         idx += snprintf(log_buf + idx, sizeof(log_buf) - idx, "[%s]", level_str[level]);
     }
 
-    if (g_log_fmt & LOG_FMT_TIME_STAMP) {
+    if (g_log_format & LOG_FMT_TIME_STAMP) {
         char     time_buf[32];
         uint16_t ms = 0;
         Get_SystemTime(time_buf, sizeof(time_buf), &ms);
         idx += snprintf(log_buf + idx, sizeof(log_buf) - idx, "[%s.%03d]", time_buf, ms);
     }
 
-    if (g_log_fmt & LOG_FMT_FUNC_LINE) {
+    if (g_log_format & LOG_FMT_FUNC_LINE) {
         char short_func[20] = {0};
         strncpy(short_func, func, sizeof(short_func) - 1);
         idx += snprintf(log_buf + idx, sizeof(log_buf) - idx, "[%s:%d]", short_func, (int)line);
     }
 
-    va_start(args, fmt);
-    int len = vsnprintf(log_buf + idx, sizeof(log_buf) - idx, fmt, args);
+    va_start(args, format);
+    int len = vsnprintf(log_buf + idx, sizeof(log_buf) - idx, format, args);
     va_end(args);
 
     if (len < 0) {

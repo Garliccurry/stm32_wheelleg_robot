@@ -2,7 +2,6 @@
 #include "log.h"
 #include "tim.h"
 #include "sensor.h"
-#include "cirbuf.h"
 #include "driver_as5600.h"
 #include "driver_mpu6050.h"
 static uint32_t g_Prescale = 5;
@@ -15,18 +14,15 @@ static uint8_t g_ASRawDataL[AS5600_I2C_DATASIZE];
 static uint8_t g_ASRawDataR[AS5600_I2C_DATASIZE];
 static uint8_t g_MPURawData[MPU6050_I2C_DATASIZE];
 
-static AsData_t  g_ASdataL;
-static AsData_t  g_ASdataR;
-static MpuData_t g_MPUdata;
-
 static volatile uint8_t g_I2CBus = BusIdle;
 
 static AsRawData_t  *g_AsRawDataBuf = NULL;
 static MpuRawData_t *g_MpuRawDataBuf = NULL;
-static CirBuf_t      g_CirAsRawBuff = {0};
-static CirBuf_t      g_CirMpuRawBuff = {0};
 
-void Sensor_SetSensorGetFre(uint32_t frequency)
+static CirBuf_t g_CirAsRawBuff = {0};
+static CirBuf_t g_CirMpuRawBuff = {0};
+
+void Sensor_SetSensorGetDataFre(uint32_t frequency)
 {
     if (frequency > MAX_FREQUENCY_TIM2) {
         frequency = MAX_FREQUENCY_TIM2;
@@ -42,22 +38,22 @@ static void Sensor_StartGetAS5600(void)
     status |= AS5600_ReadData(g_I2CASR, g_ASRawDataR);
     status |= AS5600_ReadData(g_I2CASL, g_ASRawDataL);
     if (status != HAL_OK) {
-        gI2cErrorCount++;
+        g_I2cErrorCount++;
         return;
     }
-    gflag_I2cError = WLStatusOff;
+    g_flagI2cError = WLR_StatusOff;
 }
 
 static void Sensor_StartGetMPU6050(void)
 {
     ATOMIC_WRITE(&g_I2CBus, (uint8_t)BusM);
     uint32_t status = HAL_OK;
-    status = MPU6050_ReadData(g_MPURawData);
+    status = MPU6050_MemReadData(g_MPURawData);
     if (status != HAL_OK) {
-        gI2cErrorCount++;
+        g_I2cErrorCount++;
         return;
     }
-    gflag_I2cError = WLStatusOff;
+    g_flagI2cError = WLR_StatusOff;
 }
 void Sensor_TimerGetSensor(void) // 定时器周期回调
 {
@@ -101,30 +97,32 @@ void Sensor_GetFocData(void)
 {
     static uint16_t shaft_raw_angle_L, shaft_raw_angle_R;
     static float    shaft_angle_L, shaft_angle_R;
-    if (CirBuf_AsDataRead(&g_CirAsRawBuff, &shaft_raw_angle_L, &shaft_raw_angle_R) == WL_OK) {
-        shaft_angle_L = AS5600_GetAng(shaft_raw_angle_L);
-        shaft_angle_R = AS5600_GetAng(shaft_raw_angle_R);
+    if (CirBuf_AsDataRead(&g_CirAsRawBuff, &shaft_raw_angle_L, &shaft_raw_angle_R) == WLR_OK) {
+        shaft_angle_L = AS5600_GetAngFromRaw(shaft_raw_angle_L);
+        shaft_angle_R = AS5600_GetAngFromRaw(shaft_raw_angle_R);
 
         AS5600_AngleUpdate(&g_ASdataL, shaft_angle_L);
         AS5600_AngleUpdate(&g_ASdataR, shaft_angle_R);
+
+        AS5600_GetVel(&g_ASdataL);
+        AS5600_GetVel(&g_ASdataR);
         // LOG_DEBUG("%f, %f", shaft_angle_L, shaft_angle_R);
+        g_flagFocDate = WLR_StatusAct;
     }
 }
 
 void Sensor_GetMpuData(void)
 {
     static MpuRawData_t rawdata;
-    if (CirBuf_MpuDataRead(&g_CirMpuRawBuff, &rawdata) == WL_OK) {
+    if (CirBuf_MpuDataRead(&g_CirMpuRawBuff, &rawdata) == WLR_OK) {
         MPU6050_GetData(&g_MPUdata, rawdata.data);
         // LOG_DEBUG("%f,%f,%f", g_MPUdata.accX, g_MPUdata.accY, g_MPUdata.accZ);
+        g_flagMpuDate = WLR_StatusAct;
     }
 }
 
 void Sensor_Init(void)
 {
-    MPU6050_Init();
-    AS5600_Init();
-
     g_AsRawDataBuf = (AsRawData_t *)malloc(sizeof(AsRawData_t) * AS_BUF_LEN);
     g_MpuRawDataBuf = (MpuRawData_t *)malloc(sizeof(MpuRawData_t) * MPU_BUF_LEN);
     CirBuf_AsDataInit(&g_CirAsRawBuff, AS_BUF_LEN, g_AsRawDataBuf);
@@ -133,6 +131,9 @@ void Sensor_Init(void)
     g_I2CASL = AS5600_GetHandle(AS5600Left);
     g_I2CASR = AS5600_GetHandle(AS5600Right);
     g_I2CMPU = MPU6050_GetHandle();
+
+    AS5600_Init();
+    MPU6050_Init();
 
     HAL_TIM_Base_Start_IT(&htim2);
 }

@@ -2,5 +2,6 @@
 #define CONTROL_H__
 #include "main.h"
 
-void control_leggedbalance(void);
+void Control_Init(void);
+void Control_LeggedBalance(void);
 #endif

@@ -127,7 +127,7 @@ int regAction(uint8_t ID)
     wFlushSCS();
     return Ack(ID);
 }
-#define WL_OK 0
+#define WLR_OK 0
 //ͬ��дָ��
 //���ID[]���飬IDN���鳤�ȣ�MemAddr�ڴ����ַ��д�����ݣ�д�볤��
 void syncWrite(uint8_t ID[], uint8_t IDN, uint8_t MemAddr, uint8_t *nDat, uint8_t nLen)
@@ -145,7 +145,7 @@ void syncWrite(uint8_t ID[], uint8_t IDN, uint8_t MemAddr, uint8_t *nDat, uint8_
     bBuf[5] = MemAddr;
     bBuf[6] = nLen;
 
-    if (rFlushSCS() != WL_OK) {
+    if (rFlushSCS() != WLR_OK) {
         return;
     }
     writeSCS(bBuf, 7);

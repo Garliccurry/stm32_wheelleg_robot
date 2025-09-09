@@ -3,28 +3,19 @@
 
 /**********************    INCLUDE DIRECTIVES    *************************/
 #include "main.h"
-#define ATOMIC_WRITE(ptr, value) \
-    do {                         \
-        __disable_irq();         \
-        *(ptr) = (value);        \
-        __enable_irq();          \
-    } while (0)
+#include "utils.h"
+#include "filter.h"
 
-#define ATOMIC_READ(ptr) ({ \
-    __typeof__(*(ptr)) val; \
-    __disable_irq();        \
-    val = *(ptr);           \
-    __enable_irq();         \
-    val;                    \
-})
-#define WL_OK    0
-#define WL_ERROR 1
+#define WLR_OK    0
+#define WLR_ERROR 1
 
 #define MPU6050_I2C_DATASIZE   14
 #define MPU6050_INT16_DATASIZE 7
 
 #define AS_BUF_LEN  10
 #define MPU_BUF_LEN 5
+
+#define PI 3.1415926
 /**************    CONSTANTS, MACROS, & DATA STRUCTURES    ***************/
 
 typedef struct {
@@ -39,23 +30,35 @@ typedef struct {
 typedef struct
 {
     float    temp;
-    float    accX;
-    float    accY;
-    float    accZ;
+    float    gyroXoffset;
+    float    gyroYoffset;
+    float    gyroZoffset;
     float    gyroX;
     float    gyroY;
     float    gyroZ;
-    uint32_t timestamp;
+    float    angleGyroX;
+    float    angleGyroY;
+    float    angleGyroZ;
+    float    angleAccX;
+    float    angleAccY;
+    float    angleAccZ;
+    float    angleX;
+    float    angleY;
+    float    angleZ;
+    float    gyroCoef;
+    float    accCoef;
+    uint32_t us_ts;
 } MpuData_t;
 
 typedef struct
 {
     float    angle_pre;
     float    rotat_pre;
-    uint32_t angle_pre_timestamp;
-    float    Gvel_angle_pre;
-    float    Gvel_rotat_pre;
-    uint32_t Gvel_angle_pre_timestamp;
+    uint32_t angle_pre_us_ts;
+    float    angle_get_vel;
+    float    rotat_get_vel;
+    uint32_t angle_get_vel_us_ts;
+    float    shaft_vel;
 } AsData_t;
 
 typedef struct
@@ -67,39 +70,51 @@ typedef struct
 } SCSData_t;
 
 typedef enum {
-    WLStatusIdle = 0,
-    WLStatusAct = 1,
-    WLStatusOn,
-    WLStatusOff,
-} WlFlagStatus;
+    WLR_StatusIdle = 0,
+    WLR_StatusAct,
+    WLR_StatusOn,
+    WLR_StatusOff,
+} WLR_FlagStatus;
 
 typedef enum {
-    WLUsartIdle = 0,
-    WLUsartSend,
-    WLUsartRecv,
-    WLUsartBottom,
-} WlUsart2Flag;
+    WLR_UsartIdle = 0,
+    WLR_UsartSend,
+    WLR_UsartRecv
+} WLR_Usart2Flag;
 
 typedef enum {
-    WL_ERRINIT = 65536, // Error code for placeholder
-    WL_ERR65537,        // can not get battery voltage
-    WL_ERR65538,        // I2c was interrupted for some reason(eg. burning), causing a hardware deadlock
-    WL_ERR65539,        // waiting for SCS serial bus timeout
-} WlErrorCode;
+    WLR_ERRINIT = 65536, // Error code for placeholder
+    WLR_ERR65537,        // can not get battery voltage
+    WLR_ERR65538,        // I2c was interrupted for some reason(eg. burning), causing a hardware deadlock
+    WLR_ERR65539,        // waiting for SCS serial bus timeout
+    WLR_ERR65540,        // LowPassFilter malloc fail
+    WLR_ERR65541,        // MPU6050 initial data timeout
+} WLR_ErrorCode;
 
-extern uint8_t gflag_UsartRec;
-extern uint8_t gflag_FatalErr;
-extern uint8_t gflag_I2cError;
-extern uint8_t gflag_Uart2Bus;
+extern uint8_t g_flagUsartRec;
+extern uint8_t g_flagFatalErr;
+extern uint8_t g_flagI2cError;
+extern uint8_t g_flagUart2Bus;
 
-extern uint32_t gI2cErrorCount;
+extern uint8_t g_flagFocDate;
+extern uint8_t g_flagMpuDate;
 
-extern float gVoltage;
+extern uint32_t g_I2cErrorCount;
+
+extern float g_Voltage;
+
+extern AsData_t  g_ASdataL;
+extern AsData_t  g_ASdataR;
+extern MpuData_t g_MPUdata;
+
+extern FilterSet g_filter;
 
 /***********************    FUNCTION PROTOTYPES    ***********************/
-void info_atomic_write_s32(int *ptr, int value);
-int  info_atomic_read_s32(int *ptr);
 
 void Info_TimerCallback(void);
 void Info_ProcessAffair(void);
+
+void     Info_UsTickIncrease(void);
+uint32_t Info_GetUsTick(void);
+void     Info_Init(void);
 #endif
