@@ -20,11 +20,11 @@ SCSData_t g_scsdata = {
 
 void Control_Init(void)
 {
-    HAL_StatusTypeDef status = HAL_OK;
-    status |= HAL_TIM_Base_Start_IT(&htim5);
-    if (status == HAL_OK) {
-        LOG_INFO("WheelLegged control initialization successful!");
-    }
+    // HAL_StatusTypeDef status = HAL_OK;
+    // status |= HAL_TIM_Base_Start_IT(&htim5);
+    // if (status == HAL_OK) {
+    //     LOG_INFO("WheelLegged control initialization successful!");
+    // }
 }
 
 void Control_LeggedBalance(void)

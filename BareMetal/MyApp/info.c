@@ -74,7 +74,7 @@ void Info_ProcessAffair(void)
 
 void Info_UsTickIncrease(void)
 {
-    g_usTick = g_usTick + 3;
+    g_usTick = g_usTick + 10;
 }
 
 uint32_t Info_GetUsTick(void)
@@ -84,8 +84,10 @@ uint32_t Info_GetUsTick(void)
 
 void Info_Init(void)
 {
-    uint32_t ret = HAL_TIM_Base_Start_IT(&htim5);
+    uint32_t ret = HAL_TIM_Base_Start_IT(&htim1);
     if (ret != WLR_OK) {
-        LOG_ERROR("ERROR");
+        LOG_ERROR("Infomation initial fail");
+    } else {
+        LOG_INFO("Infomation initial successful");
     }
 }
