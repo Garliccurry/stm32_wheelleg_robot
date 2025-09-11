@@ -15,7 +15,7 @@ typedef struct PID_TypeDef {
     uint32_t us_pre;
 } PID_TypeDef;
 
-typedef struct PIDSet_TypeDef {
+typedef struct PIDSet {
     PID_TypeDef *angle;
     PID_TypeDef *gyro;
     PID_TypeDef *distance;
@@ -25,9 +25,9 @@ typedef struct PIDSet_TypeDef {
     PID_TypeDef *lqr_u;
     PID_TypeDef *zerobias;
     PID_TypeDef *roll_angle;
-} PIDSet_TypeDef;
+} PIDSet;
 
-void  PID_Init(PID_TypeDef *pid, float P, float I, float D, float ramp, float limit_out);
+void  PID_SetUp(PID_TypeDef *pid, float P, float I, float D, float ramp, float limit_out);
 float PID_PosController(PID_TypeDef *pid, float error);
 // float PID_IncController(PID_TypeDef *pid, float error);
 #endif

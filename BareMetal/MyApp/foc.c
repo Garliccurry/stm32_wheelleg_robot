@@ -17,13 +17,13 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
     m_L->htim = htim_L;
     m_R->htim = htim_R;
 
-    // PID_Init(&g_Vpid_L, 1, 0.003, 0.1, 0, 1000, 40);
-    // PID_Init(&g_Vpid_R, -1, 0.003, 0.1, 0, 1000, 40);
+    // PID_SetUp(&g_Vpid_L, 1, 0.003, 0.1, 0, 1000, 40);
+    // PID_SetUp(&g_Vpid_R, -1, 0.003, 0.1, 0, 1000, 40);
     // m_L->pid_vel = &g_Vpid_L;
     // m_R->pid_vel = &g_Vpid_R;
 
-    // PID_Init(&g_Ppid_L, 1, 0.1, 0, 0, 0, 0);
-    // PID_Init(&g_Ppid_R, -1, 0.1, 0, 0, 0, 0);
+    // PID_SetUp(&g_Ppid_L, 1, 0.1, 0, 0, 0, 0);
+    // PID_SetUp(&g_Ppid_R, -1, 0.1, 0, 0, 0, 0);
     // m_L->pid_pos = &g_Ppid_L;
     // m_R->pid_pos = &g_Ppid_R;
 

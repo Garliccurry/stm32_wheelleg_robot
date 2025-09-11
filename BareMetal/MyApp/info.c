@@ -21,7 +21,8 @@ AsData_t  g_ASdataL;
 AsData_t  g_ASdataR;
 MpuData_t g_MPUdata;
 
-FilterSet g_filter = {0};
+FilterSet g_lpfSet = {0};
+PIDSet    g_pidSet = {0};
 
 float g_Voltage = 7.4;
 
@@ -43,7 +44,7 @@ static void Info_I2cBusyHandler(void)
 
 void Info_TimerCallback(void)
 {
-    static uint8_t TIM5base_cnt = 0;
+    static uint8_t base_cnt = 0;
     static uint8_t target_num = 4;
 
     if (Battery_GetData() != WLR_OK) { LOG_ERROR("can not get adc value, ret:%d", WLR_ERR65537); }
@@ -51,11 +52,11 @@ void Info_TimerCallback(void)
 
     Info_I2cBusyHandler();
 
-    if (TIM5base_cnt >= target_num && g_flagFatalErr == WLR_StatusOff) {
-        TIM5base_cnt = 0;
+    if (base_cnt >= target_num && g_flagFatalErr == WLR_StatusOff) {
+        base_cnt = 0;
         Led_Toggle();
     }
-    TIM5base_cnt++;
+    base_cnt++;
 }
 
 static void Info_I2cErrRecovery(void)

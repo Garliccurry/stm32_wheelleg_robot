@@ -48,7 +48,7 @@ void AS5600_GetVel(AsData_t *asdata)
 {
     float Ts = (asdata->angle_pre_us_ts - asdata->angle_get_vel_us_ts) * 1e-6f;
     if (Ts <= 0 || Ts > 0.1f) {
-        Ts = 1e-3f;
+        Ts = 1e-5f;
     }
 
     float vel = ((double)(asdata->rotat_pre - asdata->rotat_get_vel) * _2PI + (asdata->angle_pre - asdata->angle_get_vel)) / Ts;

@@ -34,15 +34,18 @@ void Control_LeggedBalance(void)
 
 void Control_WheelBalance(void)
 {
-    float shaft_ang_L = Filter_LpfControl(g_filter.lpf_ang_shaftL, g_ASdataL.angle_pre);
-    float shaft_ang_R = Filter_LpfControl(g_filter.lpf_ang_shaftR, g_ASdataR.angle_pre);
-    float shaft_vel_L = Filter_LpfControl(g_filter.lpf_vel_shaftL, g_ASdataL.shaft_vel);
-    float shaft_vel_R = Filter_LpfControl(g_filter.lpf_vel_shaftR, g_ASdataR.shaft_vel);
+    float shaft_ang_L = Filter_LpfControl(g_lpfSet.ang_shaftL, g_ASdataL.angle_pre);
+    float shaft_ang_R = Filter_LpfControl(g_lpfSet.ang_shaftR, g_ASdataR.angle_pre);
+    float shaft_vel_L = Filter_LpfControl(g_lpfSet.vel_shaftL, g_ASdataL.shaft_vel);
+    float shaft_vel_R = Filter_LpfControl(g_lpfSet.vel_shaftR, g_ASdataR.shaft_vel);
 
     float LQR_distance = (-0.5) * (shaft_ang_L + shaft_ang_R);
     float LQR_speed = (-0.5) * (shaft_vel_L + shaft_vel_R);
     float LQR_angle = g_MPUdata.angleY;
-    float LQR_groy = g_MPUdata.gyroY;
+    float LQR_gyro = g_MPUdata.gyroY;
+
+    // float angle_control = pid_angle(LQR_angle - angle_zeropoint);
+    // float gyro_control = pid_gyro(LQR_gyro);
 }
 
 void Control_MotionMove(void)
