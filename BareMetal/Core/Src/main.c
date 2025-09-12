@@ -115,6 +115,8 @@ int main(void)
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff, RX_BUF_SIZE);
 
     HAL_Delay(1000);
+    PID_Init();
+    Filter_Init();
     Sensor_Init();
     Control_Init();
     SoftwareTimer_Init();

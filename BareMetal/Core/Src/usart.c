@@ -255,7 +255,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
             for (int i = 0; i < RX_BUF_SIZE; i++) {
                 gCommand[i] = gRxBuff[i];
             }
-            g_flagUsartRec = WLR_StatusAct;
+            g_flagUsartRec = WLR_Act;
         }
         HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
     }
@@ -277,7 +277,7 @@ void Usart_LogPrint(uint8_t *ch, uint16_t len)
 
 void Uart_ParseCommand(void)
 {
-    if (g_flagUsartRec == WLR_StatusAct) {
+    if (g_flagUsartRec == WLR_Act) {
         // if (gCommand[0] == 0x31) {
         //     pos_left += 6;
         // } else if (gCommand[3] == 0x32) {
@@ -303,7 +303,7 @@ void Uart_ParseCommand(void)
         default:
             break;
         }
-        g_flagUsartRec = WLR_StatusIdle;
+        g_flagUsartRec = WLR_Idle;
     }
 }
 

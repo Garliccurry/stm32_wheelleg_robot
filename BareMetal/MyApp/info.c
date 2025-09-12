@@ -7,13 +7,13 @@
 #include "filter.h"
 #include "battery.h"
 #include "driver_led.h"
-uint8_t g_flagUsartRec = WLR_StatusIdle;
-uint8_t g_flagFatalErr = WLR_StatusOff;
-uint8_t g_flagI2cError = WLR_StatusOff;
+uint8_t g_flagUsartRec = WLR_Idle;
+uint8_t g_flagFatalErr = WLR_Off;
+uint8_t g_flagI2cError = WLR_Off;
 uint8_t g_flagUart2Bus = WLR_UsartIdle;
 
-uint8_t g_flagFocDate = WLR_StatusIdle;
-uint8_t g_flagMpuDate = WLR_StatusIdle;
+uint8_t g_flagFocDate = WLR_Idle;
+uint8_t g_flagMpuDate = WLR_Idle;
 
 uint32_t g_I2cErrorCount = 0;
 
@@ -32,8 +32,8 @@ static void Info_I2cBusyHandler(void)
 {
     // TODO 重新初始化有问题
     if (g_I2cErrorCount > 100) {
-        if (g_flagI2cError == WLR_StatusOff) {
-            g_flagI2cError = WLR_StatusOn;
+        if (g_flagI2cError == WLR_Off) {
+            g_flagI2cError = WLR_On;
             g_I2cErrorCount = 0;
             LOG_ERROR("I2C busy too many times, ret:%d", WLR_ERR65537);
         } else {
@@ -52,7 +52,7 @@ void Info_TimerCallback(void)
 
     Info_I2cBusyHandler();
 
-    if (base_cnt >= target_num && g_flagFatalErr == WLR_StatusOff) {
+    if (base_cnt >= target_num && g_flagFatalErr == WLR_Off) {
         base_cnt = 0;
         Led_Toggle();
     }

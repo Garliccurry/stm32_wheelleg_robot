@@ -78,7 +78,8 @@
         "numbers": "c",
         "queue": "c",
         "cstdbool": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "control.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.formatting": "clangFormat",

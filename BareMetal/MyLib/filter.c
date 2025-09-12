@@ -49,8 +49,8 @@ void Filter_Init(void)
         lpfSet->joyy = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
         BREAK_IF(lpfSet->joyy == NULL, WLR_ERR65540);
 
-        lpfSet->zerobias = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
-        BREAK_IF(lpfSet->zerobias == NULL, WLR_ERR65540);
+        lpfSet->zeropoint = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
+        BREAK_IF(lpfSet->zeropoint == NULL, WLR_ERR65540);
 
         lpfSet->ang_shaftL = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
         BREAK_IF(lpfSet->ang_shaftL == NULL, WLR_ERR65540);
@@ -71,7 +71,7 @@ void Filter_Init(void)
     }
     Filter_SetUp(lpfSet->roll, 0, FILTER_TF_ROLL);
     Filter_SetUp(lpfSet->joyy, 0, FILTER_TF_JOYY);
-    Filter_SetUp(lpfSet->zerobias, 0, 0);
+    Filter_SetUp(lpfSet->zeropoint, 0, 0);
     Filter_SetUp(lpfSet->ang_shaftL, 0, 0);
     Filter_SetUp(lpfSet->ang_shaftR, 0, 0);
     Filter_SetUp(lpfSet->vel_shaftL, 0, FILTER_TF_VEL);

@@ -41,7 +41,7 @@ static void Sensor_StartGetAS5600(void)
         g_I2cErrorCount++;
         return;
     }
-    g_flagI2cError = WLR_StatusOff;
+    g_flagI2cError = WLR_Off;
 }
 
 static void Sensor_StartGetMPU6050(void)
@@ -53,7 +53,7 @@ static void Sensor_StartGetMPU6050(void)
         g_I2cErrorCount++;
         return;
     }
-    g_flagI2cError = WLR_StatusOff;
+    g_flagI2cError = WLR_Off;
 }
 void Sensor_TimerGetSensor(void) // 定时器周期回调
 {
@@ -107,7 +107,7 @@ void Sensor_GetFocData(void)
         AS5600_GetVel(&g_ASdataL);
         AS5600_GetVel(&g_ASdataR);
         // LOG_DEBUG("%f, %f", shaft_angle_L, shaft_angle_R);
-        g_flagFocDate = WLR_StatusAct;
+        g_flagFocDate = WLR_Act;
     }
 }
 
@@ -117,7 +117,7 @@ void Sensor_GetMpuData(void)
     if (CirBuf_MpuDataRead(&g_CirMpuRawBuff, &rawdata) == WLR_OK) {
         MPU6050_GetData(&g_MPUdata, rawdata.data);
         // LOG_DEBUG("%f,%f,%f", g_MPUdata.accX, g_MPUdata.accY, g_MPUdata.accZ);
-        g_flagMpuDate = WLR_StatusAct;
+        g_flagMpuDate = WLR_Act;
     }
 }
 

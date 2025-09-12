@@ -71,10 +71,10 @@ typedef struct
 } SCSData_t;
 
 typedef enum {
-    WLR_StatusIdle = 0,
-    WLR_StatusAct,
-    WLR_StatusOn,
-    WLR_StatusOff,
+    WLR_Idle = 0,
+    WLR_Act,
+    WLR_On,
+    WLR_Off,
 } WLR_FlagStatus;
 
 typedef enum {

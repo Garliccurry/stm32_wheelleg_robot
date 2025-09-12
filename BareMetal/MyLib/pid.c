@@ -34,7 +34,7 @@ float PID_PosController(PID_TypeDef *pid, float error)
     return output;
 }
 
-void PID_SetUp(PID_TypeDef *pid, float P, float I, float D, float ramp, float limit_out)
+static void PID_SetUp(PID_TypeDef *pid, float P, float I, float D, float ramp, float limit_out)
 {
     pid->Kp = P;
     pid->Ki = I;
@@ -79,8 +79,8 @@ void PID_Init(void)
         pidSet->yaw_gyro = (PID_TypeDef *)malloc(sizeof(PID_TypeDef));
         BREAK_IF(pidSet->yaw_gyro == NULL, WLR_ERR65542);
 
-        pidSet->zerobias = (PID_TypeDef *)malloc(sizeof(PID_TypeDef));
-        BREAK_IF(pidSet->zerobias == NULL, WLR_ERR65542);
+        pidSet->zeropoint = (PID_TypeDef *)malloc(sizeof(PID_TypeDef));
+        BREAK_IF(pidSet->zeropoint == NULL, WLR_ERR65542);
 
     } while (false);
     if (ret != WLR_OK) {
@@ -96,6 +96,6 @@ void PID_Init(void)
     PID_SetUp(pidSet->speed, 0.7, 0, 0, 100000, 8);
     PID_SetUp(pidSet->yaw_angle, 1, 0, 0, 100000, 8);
     PID_SetUp(pidSet->yaw_gyro, 0.04, 0, 0, 100000, 8);
-    PID_SetUp(pidSet->zerobias, 0.002, 0, 0, 100000, 4);
-    LOG_INFO("PID control initial succ");
+    PID_SetUp(pidSet->zeropoint, 0.002, 0, 0, 100000, 4);
+    LOG_INFO("PID control initial successful");
 }
