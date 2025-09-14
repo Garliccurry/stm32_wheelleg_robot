@@ -32,11 +32,18 @@ void AS5600_Init(void)
     HAL_Delay(10);
 }
 
-HAL_StatusTypeDef AS5600_ReadData(I2cDevice_t *dev, uint8_t *asdata) // 2字节100us
+HAL_StatusTypeDef AS5600_DmaReadData(I2cDevice_t *dev, uint8_t *asdata) // 2字节100us
 {
     return HAL_I2C_Mem_Read_DMA(dev->hi2c, dev->dev_addr,
                                 AS5600_REGISTER_RAW_ANGLE_HIGH,
                                 I2C_MEMADD_SIZE_8BIT, asdata, AS5600_I2C_DATASIZE);
+}
+
+HAL_StatusTypeDef AS5600_NorReadData(I2cDevice_t *dev, uint8_t *asdata) // 2字节100us
+{
+    return HAL_I2C_Mem_Read(dev->hi2c, dev->dev_addr,
+                            AS5600_REGISTER_RAW_ANGLE_HIGH,
+                            I2C_MEMADD_SIZE_8BIT, asdata, AS5600_I2C_DATASIZE, 1000);
 }
 
 float AS5600_GetAngFromRaw(uint16_t raw_data)

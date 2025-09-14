@@ -105,7 +105,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
         /* USART1 interrupt Init */
-        HAL_NVIC_SetPriority(USART1_IRQn, 10, 0);
+        HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
         HAL_NVIC_EnableIRQ(USART1_IRQn);
         /* USER CODE BEGIN USART1_MspInit 1 */
 
@@ -247,6 +247,10 @@ int _write(int file, char *ptr, int len)
     }
     return len;
 }
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    LOG_ERROR("USART ERR: %d", huart->ErrorCode);
+}
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
@@ -257,7 +261,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
             }
             g_flagUsartRec = WLR_Act;
         }
-        HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
+        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
+        if (status != HAL_OK) {
+            LOG_ERROR("UASRT1 recieve error, ret:%d", status);
+        }
     }
 }
 
@@ -275,6 +282,7 @@ void Usart_LogPrint(uint8_t *ch, uint16_t len)
     HAL_UART_Transmit(&huart1, ch, len, 10000);
 }
 
+int  g_speed = 0;
 void Uart_ParseCommand(void)
 {
     if (g_flagUsartRec == WLR_Act) {
@@ -299,6 +307,12 @@ void Uart_ParseCommand(void)
         // }
         switch (gCommand[3]) {
         case '1':
+            g_speed += 5;
+            LOG_DEBUG("INC SPEED");
+            break;
+        case '2':
+            g_speed -= 5;
+            LOG_DEBUG("DEC SPEED");
             break;
         default:
             break;

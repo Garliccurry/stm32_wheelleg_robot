@@ -50,13 +50,11 @@ typedef struct Motor_TypeDef {
 
 void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
                    TIM_HandleTypeDef *htim_L,
-                   TIM_HandleTypeDef *htim_R,
-                   I2cDevice_t       *as_dev_L,
-                   I2cDevice_t       *as_dev_R);
+                   TIM_HandleTypeDef *htim_R);
 void SetTorque(Motor_TypeDef *m, float Uq, float angle_el);
 void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr);
 void FOC_VelocityCloseloop(Motor_TypeDef *m, float target_v, float angle, float vel);
-void FOC_WheelBalance(Motor_TypeDef *m, float error, float angle);
+void FOC_WheelBalance(Motor_TypeDef *m, float target, float angle);
 void FOC_PositionCloseloop(Motor_TypeDef *m, float motor_target, float angle, float rotation);
 void FOC_VelocityOpenLoop(Motor_TypeDef *m, float target_v);
 #endif

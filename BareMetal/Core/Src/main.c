@@ -129,13 +129,14 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
+        Uart_ParseCommand();
         Sensor_GetMpuData();
         Sensor_GetFocData();
-
+        Control_MotionMove();
         Info_ProcessAffair();
 
-        HAL_Delay(1000);
-        LOG_ERROR("Info_GetUsTick: %d", Info_GetUsTick());
+        // HAL_Delay(1000);
+        // LOG_ERROR("Info_GetUsTick: %d", Info_GetUsTick());
     }
     /* USER CODE END 3 */
 }

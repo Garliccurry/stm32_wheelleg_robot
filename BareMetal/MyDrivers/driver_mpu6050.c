@@ -44,7 +44,7 @@ int MPU6050_GetID(void)
         return -1;
 }
 
-HAL_StatusTypeDef MPU6050_MemReadData(uint8_t *data) // 10字节380us
+HAL_StatusTypeDef MPU6050_DmaReadData(uint8_t *data) // 10字节380us
 {
     return MPU6050_MemReadRegister(&g_MPU6050, MPU6050_ACCEL_XOUT_H, data, MPU6050_I2C_DATASIZE);
 }

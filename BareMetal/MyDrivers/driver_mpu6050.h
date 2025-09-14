@@ -60,7 +60,7 @@ struct mpu6050_data {
 I2cDevice_t      *MPU6050_GetHandle(void);
 void              MPU6050_Init(void);
 int               MPU6050_GetID(void);
-HAL_StatusTypeDef MPU6050_MemReadData(uint8_t *data);
+HAL_StatusTypeDef MPU6050_DmaReadData(uint8_t *data);
 void              MPU6050_GetData(MpuData_t *mdata, int16_t *rawdata);
 
 #endif

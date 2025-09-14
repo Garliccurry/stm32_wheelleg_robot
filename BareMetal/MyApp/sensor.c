@@ -35,8 +35,8 @@ static void Sensor_StartGetAS5600(void)
 {
     ATOMIC_WRITE(&g_I2CBus, (uint8_t)BusA);
     uint32_t status = HAL_OK;
-    status |= AS5600_ReadData(g_I2CASR, g_ASRawDataR);
-    status |= AS5600_ReadData(g_I2CASL, g_ASRawDataL);
+    status |= AS5600_DmaReadData(g_I2CASR, g_ASRawDataR);
+    status |= AS5600_DmaReadData(g_I2CASL, g_ASRawDataL);
     if (status != HAL_OK) {
         g_I2cErrorCount++;
         return;
@@ -48,7 +48,7 @@ static void Sensor_StartGetMPU6050(void)
 {
     ATOMIC_WRITE(&g_I2CBus, (uint8_t)BusM);
     uint32_t status = HAL_OK;
-    status = MPU6050_MemReadData(g_MPURawData);
+    status = MPU6050_DmaReadData(g_MPURawData);
     if (status != HAL_OK) {
         g_I2cErrorCount++;
         return;

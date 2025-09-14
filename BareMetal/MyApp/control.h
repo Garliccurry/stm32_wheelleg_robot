@@ -22,4 +22,5 @@ typedef struct WLrobot {
 
 void Control_Init(void);
 void Control_LeggedBalance(void);
+void Control_MotionMove(void);
 #endif

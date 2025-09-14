@@ -42,6 +42,7 @@ static void PID_SetUp(PID_TypeDef *pid, float P, float I, float D, float ramp, f
     pid->ramp = F_ABS(ramp);
     pid->limit_out = limit_out;
 
+    pid->output_pre = 0.0f;
     pid->error_pre = 0.0f;
     pid->inte_pre = 0.0f;
     pid->us_pre = Info_GetUsTick();
