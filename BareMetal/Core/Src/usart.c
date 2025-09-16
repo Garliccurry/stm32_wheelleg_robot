@@ -307,12 +307,12 @@ void Uart_ParseCommand(void)
         // }
         switch (gCommand[3]) {
         case '1':
-            g_speed += 5;
-            LOG_DEBUG("INC SPEED");
+            g_speed += 1;
+            LOG_DEBUG("INC SPEED +: %f", g_speed);
             break;
         case '2':
-            g_speed -= 5;
-            LOG_DEBUG("DEC SPEED");
+            g_speed -= 1;
+            LOG_DEBUG("DEC SPEED -: %f", g_speed);
             break;
         default:
             break;

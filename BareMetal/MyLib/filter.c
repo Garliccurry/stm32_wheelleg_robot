@@ -21,7 +21,7 @@ float Filter_LpfControl(LPF_TypeDef *lpf, float input)
 
     float dt = (now_us - lpf->us_ts) * 1e-6f;
     if (dt < 0) {
-        dt = 1e-5f;
+        dt = 1e-3f;
     } else if (dt > 0.3f || lpf->TimeConstant <= 0) {
         lpf->us_ts = now_us;
         lpf->output_prev = input;

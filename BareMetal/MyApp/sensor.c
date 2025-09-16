@@ -97,6 +97,7 @@ void Sensor_GetFocData(void)
 {
     static uint16_t shaft_raw_angle_L, shaft_raw_angle_R;
     static float    shaft_angle_L, shaft_angle_R;
+    // static i = 0;
     if (CirBuf_AsDataRead(&g_CirAsRawBuff, &shaft_raw_angle_L, &shaft_raw_angle_R) == WLR_OK) {
         shaft_angle_L = AS5600_GetAngFromRaw(shaft_raw_angle_L);
         shaft_angle_R = AS5600_GetAngFromRaw(shaft_raw_angle_R);
@@ -106,8 +107,11 @@ void Sensor_GetFocData(void)
 
         AS5600_GetVel(&g_ASdataL);
         AS5600_GetVel(&g_ASdataR);
-        // LOG_DEBUG("%f, %f", shaft_angle_L, shaft_angle_R);
         g_flagFocDate = WLR_Act;
+        // if (i % 100 == 99) {
+        //     printf("%f\r\n", g_ASdataL.shaft_vel);
+        // }
+        // i++;
     }
 }
 

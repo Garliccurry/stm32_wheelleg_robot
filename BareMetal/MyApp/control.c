@@ -129,8 +129,9 @@ static void Control_WheelSetFoc(float target_L, float target_R)
 
     shaftL = Filter_LpfControl(lpfset->ang_shaftL, shaftL);
     shaftR = Filter_LpfControl(lpfset->ang_shaftR, shaftR);
-    FOC_WheelBalance(&motor_L, (float)g_speed, shaftL);
-    // FOC_WheelBalance(&motor_R, target_R, shaftR);
+    // FOC_WheelBalance(&motor_L, (float)g_speed, shaftL);
+    FOC_WheelBalance(&motor_L, target_L, shaftL);
+    FOC_WheelBalance(&motor_R, target_R, shaftR);
 }
 
 static void Control_WheelBalance(void)

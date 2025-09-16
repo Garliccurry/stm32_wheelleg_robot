@@ -4,52 +4,6 @@
 #include "log.h"
 #include "driver_as5600.h"
 
-void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
-                   TIM_HandleTypeDef *htim_L,
-                   TIM_HandleTypeDef *htim_R)
-{
-    if (!(m_L && m_R && htim_L && htim_R)) {
-        LOG_INFO("FOC initialization failed!");
-        return;
-    }
-    m_L->htim = htim_L;
-    m_R->htim = htim_R;
-
-    FOC_AlignSensor(m_L, POLE_PAIRS, MOTOR_DIR_L, V_POWER);
-    FOC_AlignSensor(m_R, POLE_PAIRS, MOTOR_DIR_R, V_POWER);
-
-    m_L->as_dev = AS5600_GetHandle(AS5600Left);
-    m_R->as_dev = AS5600_GetHandle(AS5600Right);
-
-    HAL_StatusTypeDef status = HAL_OK;
-
-    uint8_t  asrawdataL[AS5600_I2C_DATASIZE], asrawdataR[AS5600_I2C_DATASIZE];
-    uint16_t asu16dataL, asu16dataR;
-    status |= AS5600_NorReadData(m_L->as_dev, asrawdataL);
-    status |= AS5600_NorReadData(m_R->as_dev, asrawdataR);
-    asu16dataL = (uint16_t)asrawdataL[0] << 8 | asrawdataL[1];
-    asu16dataR = (uint16_t)asrawdataR[0] << 8 | asrawdataR[1];
-    m_L->Z_ElecAngle = AS5600_GetAngFromRaw(asu16dataL);
-    m_R->Z_ElecAngle = AS5600_GetAngFromRaw(asu16dataR);
-
-    MOTOR_L_ENABLE;
-    MOTOR_R_ENABLE;
-
-    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_1);
-    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_2);
-    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_3);
-
-    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_1);
-    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_2);
-    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_3);
-
-    if (status != HAL_OK) {
-        LOG_INFO("FOC initialization failed!");
-    } else {
-        LOG_INFO("FOC initialization successful!");
-    }
-}
-
 static float NormalizeAngle(float ele_angle)
 {
     float a = fmodf(ele_angle, _2PI);
@@ -66,7 +20,7 @@ void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr)
     m->PP = PP;
     m->DIR = DIR;
     m->Vpwr = Vpwr;
-    m->Z_ElecAngle = Closeloop_ElecAngle(m, 0);
+    m->Z_ElecAngle = 0;
 }
 
 // int i = 0;
@@ -97,8 +51,8 @@ void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr)
 
 void SetTorque(Motor_TypeDef *m, float Uq, float angle_el)
 {
-    // LOG_DEBUG("%f,%f", Uq, angle_el);// TODO(oujiali)正反转有问题
-    angle_el = NormalizeAngle(angle_el + m->Z_ElecAngle);
+    // LOG_DEBUG("%f,%f", Uq, angle_el); // TODO(oujiali)正反转有问题
+    angle_el = NormalizeAngle(angle_el);
     float Ualpha = -Uq * sin(angle_el);
     float Ubeta = Uq * cos(angle_el);
 
@@ -152,3 +106,61 @@ void FOC_VelocityOpenLoop(Motor_TypeDef *m, float target_v)
     SetTorque(m, Uq, Openloop_ElecAngle(m, g_shaft_angle));
 }
 #endif
+
+void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
+                   TIM_HandleTypeDef *htim_L,
+                   TIM_HandleTypeDef *htim_R)
+{
+    if (!(m_L && m_R && htim_L && htim_R)) {
+        LOG_INFO("FOC initialization failed!");
+        return;
+    }
+    m_L->htim = htim_L;
+    m_R->htim = htim_R;
+
+    FOC_AlignSensor(m_L, POLE_PAIRS, MOTOR_DIR_L, V_POWER);
+    FOC_AlignSensor(m_R, POLE_PAIRS, MOTOR_DIR_R, V_POWER);
+
+    m_L->as_dev = AS5600_GetHandle(AS5600Left);
+    m_R->as_dev = AS5600_GetHandle(AS5600Right);
+
+    HAL_StatusTypeDef status = HAL_OK;
+
+    MOTOR_L_ENABLE;
+    MOTOR_R_ENABLE;
+    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_1);
+    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_2);
+    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_3);
+
+    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_1);
+    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_2);
+    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_3);
+
+    SetTorque(m_L, m_L->Vpwr, _3PI_2);
+    SetTorque(m_R, m_R->Vpwr, _3PI_2);
+    HAL_Delay(100);
+
+    LOG_DEBUG("Left Zero ele angle ret:%d", status);
+    uint8_t  asrawdataL[AS5600_I2C_DATASIZE] = {0}, asrawdataR[AS5600_I2C_DATASIZE] = {0};
+    uint16_t asu16dataL, asu16dataR;
+    status |= AS5600_NorReadData(m_L->as_dev, asrawdataL);
+    status |= AS5600_NorReadData(m_R->as_dev, asrawdataR);
+    asu16dataL = (uint16_t)asrawdataL[0] << 8 | asrawdataL[1];
+    asu16dataR = (uint16_t)asrawdataR[0] << 8 | asrawdataR[1];
+    float angleL = AS5600_GetAngFromRaw(asu16dataL);
+    float angleR = AS5600_GetAngFromRaw(asu16dataR);
+    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
+    m_L->Z_ElecAngle = Closeloop_ElecAngle(m_L, angleL);
+    m_R->Z_ElecAngle = Closeloop_ElecAngle(m_R, angleR);
+    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
+
+    SetTorque(m_L, 0, 0);
+    SetTorque(m_R, 0, 0);
+    HAL_Delay(100);
+
+    if (status != HAL_OK) {
+        LOG_INFO("FOC initialization failed, ret: %d", status);
+    } else {
+        LOG_INFO("FOC initialization successful!");
+    }
+}

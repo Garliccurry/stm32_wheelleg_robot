@@ -9,7 +9,7 @@ float PID_PosController(PID_TypeDef *pid, float error)
 
     float Ts = (us_now - pid->us_pre) * 1e-6f;
     if (Ts < 0 || Ts > 0.1f) {
-        Ts = 1e-5f;
+        Ts = 1e-3f;
     }
 
     float prop = pid->Kp * error;

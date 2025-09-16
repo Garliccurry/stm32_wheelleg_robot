@@ -76,7 +76,7 @@ void MPU6050_GetData(MpuData_t *mdata, int16_t *rawdata)
 
     float interval = (Info_GetUsTick() - mdata->us_ts) * 1e-6f;
     if (interval < 0 || interval > 0.1f) {
-        interval = 1e-5f;
+        interval = 1e-3f;
     }
     mdata->angleGyroX += mdata->gyroX * interval;
     mdata->angleGyroY += mdata->gyroY * interval;
