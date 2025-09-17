@@ -41,7 +41,7 @@ void Control_LeggedBalance(void)
 
 static float Control_WheelGetLQR(void)
 {
-    static float angle_zeropoint = -2.25f;
+    static float angle_zeropoint = 7.5f;
     static float distance_zeropoint = 0;
     static float robot_speed = 0;      //记录当前轮部转速
     static float robot_speed_last = 0; //记录上一时刻的轮部转速
@@ -58,7 +58,7 @@ static float Control_WheelGetLQR(void)
     float LQR_speed = (-0.5) * (shaft_vel_L + shaft_vel_R);
     float LQR_angle = g_MPUdata.angleY;
     float LQR_gyro = g_MPUdata.gyroY;
-    float LQR_u = 0;
+    float LQR_output = 0;
 
     float angle_control = PID_PosController(pidSet->angle, LQR_angle - angle_zeropoint);
     float gyro_control = PID_PosController(pidSet->gyro, LQR_gyro);
@@ -84,13 +84,13 @@ static float Control_WheelGetLQR(void)
     robot_speed = LQR_speed;
     if (F_ABS(robot_speed - robot_speed_last) > 10 || F_ABS(robot_speed) > 50 || (wlrobot.jump_flag != WLR_Off)) {
         distance_zeropoint = LQR_distance;
-        LQR_u = angle_control + gyro_control;
+        LQR_output = angle_control + gyro_control;
         pidSet->lqr_u->error_pre = 0;
     } else {
-        LQR_u = angle_control + gyro_control + distance_control + speed_control;
+        LQR_output = angle_control + gyro_control + distance_control + speed_control;
     }
-    if (F_ABS(LQR_u) < 5 && wlrobot.joyy == WLR_Off && F_ABS(distance_control) < 4 && (wlrobot.jump_flag == WLR_Off)) {
-        LQR_u = PID_PosController(pidSet->lqr_u, LQR_u);
+    if (F_ABS(LQR_output) < 5 && wlrobot.joyy == WLR_Off && F_ABS(distance_control) < 4 && (wlrobot.jump_flag == WLR_Off)) {
+        LQR_output = PID_PosController(pidSet->lqr_u, LQR_output);
         float lpf_zeropoint_value = Filter_LpfControl(lpfSet->zeropoint, distance_control);
         angle_zeropoint -= PID_PosController(pidSet->zeropoint, lpf_zeropoint_value);
     } else {
@@ -106,21 +106,13 @@ static float Control_WheelGetLQR(void)
     }
 
     // LOG_INFO("%f,%f,%f,%f", LQR_angle, LQR_gyro, angle_control, gyro_control);
-    return LQR_u;
+    return LQR_output;
 }
-
-// float YAW_gyro = 0; //TODO(oujiali)处理yaw转向
-// float YAW_angle = 0;
-// float YAW_angle_last = 0;
-// float YAW_angle_total = 0;
-// float YAW_angle_zero_point = -10;
-// float YAW_output = 0;
 
 static float Control_WheelGetYaw(void)
 {
     return 0;
 }
-extern int  g_speed;
 static void Control_WheelSetFoc(float target_L, float target_R)
 {
     float      shaftL = g_ASdataL.angle_pre;
@@ -129,17 +121,16 @@ static void Control_WheelSetFoc(float target_L, float target_R)
 
     shaftL = Filter_LpfControl(lpfset->ang_shaftL, shaftL);
     shaftR = Filter_LpfControl(lpfset->ang_shaftR, shaftR);
-    // FOC_WheelBalance(&motor_L, (float)g_speed, shaftL);
     FOC_WheelBalance(&motor_L, target_L, shaftL);
     FOC_WheelBalance(&motor_R, target_R, shaftR);
 }
 
 static void Control_WheelBalance(void)
 {
-    float LQR_u = Control_WheelGetLQR();
+    float LQR_output = Control_WheelGetLQR();
     float YAW_output = Control_WheelGetYaw();
-    float target_L = -(LQR_u + YAW_output);
-    float target_R = -(LQR_u - YAW_output);
+    float target_L = -0.15 * (LQR_output + YAW_output);
+    float target_R = -0.15 * (LQR_output - YAW_output);
     Control_WheelSetFoc(target_L, target_R);
 }
 

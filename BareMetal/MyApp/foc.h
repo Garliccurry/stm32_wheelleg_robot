@@ -21,11 +21,12 @@
 #define _3PI_2   4.71238898038f
 #define _PI_6    0.52359877559f
 
-#define V_POWER       7.f
-#define POLE_PAIRS    7.f
-#define MOTOR_DIR_L   -1.f
-#define MOTOR_DIR_R   -1.f
-#define ang_roll_zero -8.8f
+#define FOC_VOLT_POWER   7.f
+#define FOC_POLE_PAIRS   7.f
+#define FOC_MOTOR_DIR_L  -1.f
+#define FOC_MOTOR_DIR_R  1.f
+#define FOC_SENSOR_DIR_L -1.f
+#define FOC_SENSOR_DIR_R -1.f
 
 #define MOTOR_L_ENABLE  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET)
 #define MOTOR_R_ENABLE  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET)
@@ -38,7 +39,8 @@ typedef struct Motor_TypeDef {
     TIM_HandleTypeDef *htim;
 
     float PP;
-    float DIR;
+    float sDIR;
+    float mDIR;
     float Vpwr;
     float Z_ElecAngle;
 
@@ -52,7 +54,6 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
                    TIM_HandleTypeDef *htim_L,
                    TIM_HandleTypeDef *htim_R);
 void SetTorque(Motor_TypeDef *m, float Uq, float angle_el);
-void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr);
 void FOC_VelocityCloseloop(Motor_TypeDef *m, float target_v, float angle, float vel);
 void FOC_WheelBalance(Motor_TypeDef *m, float target, float angle);
 void FOC_PositionCloseloop(Motor_TypeDef *m, float motor_target, float angle, float rotation);
