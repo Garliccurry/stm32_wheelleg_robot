@@ -25,7 +25,8 @@ typedef enum {
 /***********************    FUNCTION PROTOTYPES    ***********************/
 I2cDevice_t      *AS5600_GetHandle(AS5600Dir dir);
 void              AS5600_Init(void);
-HAL_StatusTypeDef AS5600_ReadData(I2cDevice_t *dev, uint8_t *data);
+HAL_StatusTypeDef AS5600_DmaReadData(I2cDevice_t *dev, uint8_t *asdata);
+HAL_StatusTypeDef AS5600_NorReadData(I2cDevice_t *dev, uint8_t *asdata);
 float             AS5600_GetAngFromRaw(uint16_t raw_data);
 void              AS5600_GetVel(AsData_t *as5600);
 void              AS5600_AngleUpdate(AsData_t *asdata, float angle);

@@ -5,6 +5,7 @@
 #include "main.h"
 #include "utils.h"
 #include "filter.h"
+#include "pid.h"
 
 #define WLR_OK    0
 #define WLR_ERROR 1
@@ -70,10 +71,10 @@ typedef struct
 } SCSData_t;
 
 typedef enum {
-    WLR_StatusIdle = 0,
-    WLR_StatusAct,
-    WLR_StatusOn,
-    WLR_StatusOff,
+    WLR_Idle = 0,
+    WLR_Act,
+    WLR_On,
+    WLR_Off,
 } WLR_FlagStatus;
 
 typedef enum {
@@ -89,6 +90,8 @@ typedef enum {
     WLR_ERR65539,        // waiting for SCS serial bus timeout
     WLR_ERR65540,        // LowPassFilter malloc fail
     WLR_ERR65541,        // MPU6050 initial data timeout
+    WLR_ERR65542,        // AS5600 initial data timeout
+    WLR_ERR65543,        // empty point fail
 } WLR_ErrorCode;
 
 extern uint8_t g_flagUsartRec;
@@ -107,7 +110,8 @@ extern AsData_t  g_ASdataL;
 extern AsData_t  g_ASdataR;
 extern MpuData_t g_MPUdata;
 
-extern FilterSet g_filter;
+extern FilterSet g_lpfSet;
+extern PIDSet    g_pidSet;
 
 /***********************    FUNCTION PROTOTYPES    ***********************/
 

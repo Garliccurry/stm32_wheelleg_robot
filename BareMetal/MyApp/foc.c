@@ -4,54 +4,6 @@
 #include "log.h"
 #include "driver_as5600.h"
 
-void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
-                   TIM_HandleTypeDef *htim_L,
-                   TIM_HandleTypeDef *htim_R,
-                   I2cDevice_t       *as_dev_L,
-                   I2cDevice_t       *as_dev_R)
-{
-    if (!(m_L && m_R && htim_L && htim_R)) {
-        LOG_INFO("FOC initialization failed!");
-        return;
-    }
-    m_L->htim = htim_L;
-    m_R->htim = htim_R;
-
-    // PID_Init(&g_Vpid_L, 1, 0.003, 0.1, 0, 1000, 40);
-    // PID_Init(&g_Vpid_R, -1, 0.003, 0.1, 0, 1000, 40);
-    // m_L->pid_vel = &g_Vpid_L;
-    // m_R->pid_vel = &g_Vpid_R;
-
-    // PID_Init(&g_Ppid_L, 1, 0.1, 0, 0, 0, 0);
-    // PID_Init(&g_Ppid_R, -1, 0.1, 0, 0, 0, 0);
-    // m_L->pid_pos = &g_Ppid_L;
-    // m_R->pid_pos = &g_Ppid_R;
-
-    m_L->as_dev = as_dev_L;
-    m_R->as_dev = as_dev_R;
-
-    FOC_AlignSensor(m_L, POLE_PAIRS, MOTOR_DIR_L, V_POWER);
-    FOC_AlignSensor(m_R, POLE_PAIRS, MOTOR_DIR_R, V_POWER);
-
-    MOTOR_L_ENABLE;
-    MOTOR_R_ENABLE;
-
-    HAL_StatusTypeDef status = HAL_OK;
-    status |= HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
-    status |= HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
-    status |= HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
-
-    status |= HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-    status |= HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-    status |= HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-
-    if (status != HAL_OK) {
-        LOG_INFO("FOC initialization failed!");
-    } else {
-        LOG_INFO("FOC initialization successful!");
-    }
-}
-
 static float NormalizeAngle(float ele_angle)
 {
     float a = fmodf(ele_angle, _2PI);
@@ -60,15 +12,16 @@ static float NormalizeAngle(float ele_angle)
 
 static float Closeloop_ElecAngle(Motor_TypeDef *m, float angle)
 {
-    return NormalizeAngle((float)(m->DIR * m->PP) * angle - (m->Z_ElecAngle));
+    return NormalizeAngle((float)(m->sDIR * m->PP) * angle - (m->Z_ElecAngle));
 }
 
-void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr)
+static void FOC_AlignSensor(Motor_TypeDef *m, float PP, float sDIR, float mDIR, float Vpwr)
 {
     m->PP = PP;
-    m->DIR = DIR;
+    m->sDIR = sDIR;
+    m->mDIR = mDIR;
     m->Vpwr = Vpwr;
-    m->Z_ElecAngle = Closeloop_ElecAngle(m, 0);
+    m->Z_ElecAngle = 0;
 }
 
 // int i = 0;
@@ -99,7 +52,8 @@ void FOC_AlignSensor(Motor_TypeDef *m, float PP, float DIR, float Vpwr)
 
 void SetTorque(Motor_TypeDef *m, float Uq, float angle_el)
 {
-    angle_el = NormalizeAngle(angle_el + m->Z_ElecAngle);
+    // LOG_DEBUG("%f,%f", Uq, angle_el); // TODO(oujiali)正反转有问题
+    angle_el = NormalizeAngle(angle_el);
     float Ualpha = -Uq * sin(angle_el);
     float Ubeta = Uq * cos(angle_el);
 
@@ -123,16 +77,17 @@ void FOC_VelocityCloseloop(Motor_TypeDef *m, float target_v, float angle, float 
     SetTorque(m, pid_output, Closeloop_ElecAngle(m, angle));
 }
 
-void FOC_WheelBalance(Motor_TypeDef *m, float error, float angle)
+void FOC_WheelBalance(Motor_TypeDef *m, float target, float angle)
 {
-    SetTorque(m, error, Closeloop_ElecAngle(m, angle));
+    float m_target = (m->mDIR >= 0) ? target : -target;
+    SetTorque(m, m_target, Closeloop_ElecAngle(m, angle));
 }
 
 void FOC_PositionCloseloop(Motor_TypeDef *m, float motor_target, float angle, float rotation)
 {
     float Sensor_Angle, Kp = 0.001;
     Sensor_Angle = rotation * 6.28318530718f + angle;
-    SetTorque(m, CONSTRAIN(-Kp * (motor_target - m->DIR * Sensor_Angle) * 180 / _PI, -6, 6), Closeloop_ElecAngle(m, Sensor_Angle));
+    SetTorque(m, CONSTRAIN(-Kp * (motor_target - m->sDIR * Sensor_Angle) * 180 / _PI, -6, 6), Closeloop_ElecAngle(m, Sensor_Angle));
 }
 
 #ifdef TEST
@@ -149,7 +104,65 @@ void FOC_VelocityOpenLoop(Motor_TypeDef *m, float target_v)
 
     g_shaft_angle = g_shaft_angle + target_v * Ts;
     // LOG_DEBUG("%f\r\n", g_shaft_angle);
-    float Uq = V_POWER / 2;
+    float Uq = FOC_VOLT_POWER / 2;
     SetTorque(m, Uq, Openloop_ElecAngle(m, g_shaft_angle));
 }
 #endif
+
+void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
+                   TIM_HandleTypeDef *htim_L,
+                   TIM_HandleTypeDef *htim_R)
+{
+    if (!(m_L && m_R && htim_L && htim_R)) {
+        LOG_INFO("FOC initialization failed!");
+        return;
+    }
+    m_L->htim = htim_L;
+    m_R->htim = htim_R;
+
+    FOC_AlignSensor(m_L, FOC_POLE_PAIRS, FOC_SENSOR_DIR_L, FOC_MOTOR_DIR_L, FOC_VOLT_POWER);
+    FOC_AlignSensor(m_R, FOC_POLE_PAIRS, FOC_SENSOR_DIR_R, FOC_MOTOR_DIR_R, FOC_VOLT_POWER);
+
+    m_L->as_dev = AS5600_GetHandle(AS5600Left);
+    m_R->as_dev = AS5600_GetHandle(AS5600Right);
+
+    HAL_StatusTypeDef status = HAL_OK;
+
+    MOTOR_L_ENABLE;
+    MOTOR_R_ENABLE;
+    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_1);
+    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_2);
+    status |= HAL_TIM_PWM_Start(htim_L, TIM_CHANNEL_3);
+
+    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_1);
+    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_2);
+    status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_3);
+
+    SetTorque(m_L, m_L->Vpwr, _3PI_2);
+    SetTorque(m_R, m_R->Vpwr, _3PI_2);
+    HAL_Delay(100);
+
+    LOG_DEBUG("Left Zero ele angle ret:%d", status);
+    uint8_t  asrawdataL[AS5600_I2C_DATASIZE] = {0}, asrawdataR[AS5600_I2C_DATASIZE] = {0};
+    uint16_t asu16dataL, asu16dataR;
+    status |= AS5600_NorReadData(m_L->as_dev, asrawdataL);
+    status |= AS5600_NorReadData(m_R->as_dev, asrawdataR);
+    asu16dataL = (uint16_t)asrawdataL[0] << 8 | asrawdataL[1];
+    asu16dataR = (uint16_t)asrawdataR[0] << 8 | asrawdataR[1];
+    float angleL = AS5600_GetAngFromRaw(asu16dataL);
+    float angleR = AS5600_GetAngFromRaw(asu16dataR);
+    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
+    m_L->Z_ElecAngle = Closeloop_ElecAngle(m_L, angleL);
+    m_R->Z_ElecAngle = Closeloop_ElecAngle(m_R, angleR);
+    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
+
+    SetTorque(m_L, 0, 0);
+    SetTorque(m_R, 0, 0);
+    HAL_Delay(100);
+
+    if (status != HAL_OK) {
+        LOG_INFO("FOC initialization failed, ret: %d", status);
+    } else {
+        LOG_INFO("FOC initialization successful!");
+    }
+}

@@ -42,6 +42,8 @@
 #define MPU6050_Z_GYRO_OFFSET  (0)
 
 #define MPU6050_GYRO_INIT_COUNT 1000
+#define MPU6050_ACC_COEF        0.02f
+#define MPU6050_GYRO_COEF       (1.f - MPU6050_ACC_COEF)
 
 //#define MPU6050_X_ACCEL_OFFSET	(-17)
 //#define MPU6050_Y_ACCEL_OFFSET 	(13)
@@ -58,7 +60,7 @@ struct mpu6050_data {
 I2cDevice_t      *MPU6050_GetHandle(void);
 void              MPU6050_Init(void);
 int               MPU6050_GetID(void);
-HAL_StatusTypeDef MPU6050_MemReadData(uint8_t *data);
+HAL_StatusTypeDef MPU6050_DmaReadData(uint8_t *data);
 void              MPU6050_GetData(MpuData_t *mdata, int16_t *rawdata);
 
 #endif

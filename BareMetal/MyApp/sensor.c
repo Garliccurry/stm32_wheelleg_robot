@@ -35,25 +35,25 @@ static void Sensor_StartGetAS5600(void)
 {
     ATOMIC_WRITE(&g_I2CBus, (uint8_t)BusA);
     uint32_t status = HAL_OK;
-    status |= AS5600_ReadData(g_I2CASR, g_ASRawDataR);
-    status |= AS5600_ReadData(g_I2CASL, g_ASRawDataL);
+    status |= AS5600_DmaReadData(g_I2CASR, g_ASRawDataR);
+    status |= AS5600_DmaReadData(g_I2CASL, g_ASRawDataL);
     if (status != HAL_OK) {
         g_I2cErrorCount++;
         return;
     }
-    g_flagI2cError = WLR_StatusOff;
+    g_flagI2cError = WLR_Off;
 }
 
 static void Sensor_StartGetMPU6050(void)
 {
     ATOMIC_WRITE(&g_I2CBus, (uint8_t)BusM);
     uint32_t status = HAL_OK;
-    status = MPU6050_MemReadData(g_MPURawData);
+    status = MPU6050_DmaReadData(g_MPURawData);
     if (status != HAL_OK) {
         g_I2cErrorCount++;
         return;
     }
-    g_flagI2cError = WLR_StatusOff;
+    g_flagI2cError = WLR_Off;
 }
 void Sensor_TimerGetSensor(void) // 定时器周期回调
 {
@@ -97,6 +97,7 @@ void Sensor_GetFocData(void)
 {
     static uint16_t shaft_raw_angle_L, shaft_raw_angle_R;
     static float    shaft_angle_L, shaft_angle_R;
+    // static i = 0;
     if (CirBuf_AsDataRead(&g_CirAsRawBuff, &shaft_raw_angle_L, &shaft_raw_angle_R) == WLR_OK) {
         shaft_angle_L = AS5600_GetAngFromRaw(shaft_raw_angle_L);
         shaft_angle_R = AS5600_GetAngFromRaw(shaft_raw_angle_R);
@@ -106,8 +107,11 @@ void Sensor_GetFocData(void)
 
         AS5600_GetVel(&g_ASdataL);
         AS5600_GetVel(&g_ASdataR);
-        // LOG_DEBUG("%f, %f", shaft_angle_L, shaft_angle_R);
-        g_flagFocDate = WLR_StatusAct;
+        g_flagFocDate = WLR_Act;
+        // if (i % 100 == 99) {
+        //     printf("%f\r\n", g_ASdataL.shaft_vel);
+        // }
+        // i++;
     }
 }
 
@@ -117,7 +121,7 @@ void Sensor_GetMpuData(void)
     if (CirBuf_MpuDataRead(&g_CirMpuRawBuff, &rawdata) == WLR_OK) {
         MPU6050_GetData(&g_MPUdata, rawdata.data);
         // LOG_DEBUG("%f,%f,%f", g_MPUdata.accX, g_MPUdata.accY, g_MPUdata.accZ);
-        g_flagMpuDate = WLR_StatusAct;
+        g_flagMpuDate = WLR_Act;
     }
 }
 

@@ -44,7 +44,7 @@ int MPU6050_GetID(void)
         return -1;
 }
 
-HAL_StatusTypeDef MPU6050_MemReadData(uint8_t *data) // 10字节380us
+HAL_StatusTypeDef MPU6050_DmaReadData(uint8_t *data) // 10字节380us
 {
     return MPU6050_MemReadRegister(&g_MPU6050, MPU6050_ACCEL_XOUT_H, data, MPU6050_I2C_DATASIZE);
 }
@@ -73,10 +73,11 @@ void MPU6050_GetData(MpuData_t *mdata, int16_t *rawdata)
     mdata->gyroX -= mdata->gyroXoffset;
     mdata->gyroY -= mdata->gyroYoffset;
     mdata->gyroZ -= mdata->gyroZoffset;
-    LOG_DEBUG("%f,%f,%f", mdata->gyroX, mdata->gyroY, mdata->gyroZ);
 
     float interval = (Info_GetUsTick() - mdata->us_ts) * 1e-6f;
-
+    if (interval < 0 || interval > 0.1f) {
+        interval = 1e-3f;
+    }
     mdata->angleGyroX += mdata->gyroX * interval;
     mdata->angleGyroY += mdata->gyroY * interval;
     mdata->angleGyroZ += mdata->gyroZ * interval;
@@ -134,6 +135,8 @@ void MPU6050_Init(void)
     g_MPUdata.gyroYoffset = gyroY;
     g_MPUdata.gyroZoffset = gyroZ;
     LOG_INFO("mpu6050 Gyro offset X:%f, Y:%f, Z:%f", g_MPUdata.gyroXoffset, g_MPUdata.gyroYoffset, g_MPUdata.gyroZoffset);
+    g_MPUdata.accCoef = MPU6050_ACC_COEF;
+    g_MPUdata.gyroCoef = MPU6050_GYRO_COEF;
     if (ret == WLR_OK) {
         LOG_INFO("mpu6050 initialization successful!");
     } else {

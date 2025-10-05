@@ -32,11 +32,18 @@ void AS5600_Init(void)
     HAL_Delay(10);
 }
 
-HAL_StatusTypeDef AS5600_ReadData(I2cDevice_t *dev, uint8_t *asdata) // 2字节100us
+HAL_StatusTypeDef AS5600_DmaReadData(I2cDevice_t *dev, uint8_t *asdata) // 2字节100us
 {
     return HAL_I2C_Mem_Read_DMA(dev->hi2c, dev->dev_addr,
                                 AS5600_REGISTER_RAW_ANGLE_HIGH,
                                 I2C_MEMADD_SIZE_8BIT, asdata, AS5600_I2C_DATASIZE);
+}
+
+HAL_StatusTypeDef AS5600_NorReadData(I2cDevice_t *dev, uint8_t *asdata) // 2字节100us
+{
+    return HAL_I2C_Mem_Read(dev->hi2c, dev->dev_addr,
+                            AS5600_REGISTER_RAW_ANGLE_HIGH,
+                            I2C_MEMADD_SIZE_8BIT, asdata, AS5600_I2C_DATASIZE, 1000);
 }
 
 float AS5600_GetAngFromRaw(uint16_t raw_data)
@@ -54,7 +61,7 @@ void AS5600_GetVel(AsData_t *asdata)
     float vel = ((double)(asdata->rotat_pre - asdata->rotat_get_vel) * _2PI + (asdata->angle_pre - asdata->angle_get_vel)) / Ts;
 
     asdata->angle_get_vel = asdata->angle_pre;
-    asdata->rotat_get_vel = asdata->rotat_get_vel;
+    asdata->rotat_get_vel = asdata->rotat_pre;
     asdata->angle_get_vel_us_ts = asdata->angle_pre_us_ts;
     //    if(vel > 500.0f || vel < -500.0f) vel = 0.0f;
     asdata->shaft_vel = vel;

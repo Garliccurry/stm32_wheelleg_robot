@@ -9,7 +9,7 @@ static LPF_TypeDef g_LpfPower;
 
 void Battery_Init(void)
 {
-    Filter_LpfInit(&g_LpfPower, 7.5, 0.3);
+    Filter_SetUp(&g_LpfPower, 7.5, 0.3);
     if (HAL_ADC_Start(&hadc1) == HAL_OK) {
         LOG_INFO("Power detection initialization successful!");
     } else {
