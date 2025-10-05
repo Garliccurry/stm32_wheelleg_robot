@@ -41,7 +41,7 @@ void Control_LeggedBalance(void)
 
 static float Control_WheelGetLQR(void)
 {
-    static float angle_zeropoint = 7.5f;
+    static float angle_zeropoint = 8.0f;
     static float distance_zeropoint = 0;
     static float robot_speed = 0;      //记录当前轮部转速
     static float robot_speed_last = 0; //记录上一时刻的轮部转速
@@ -129,8 +129,8 @@ static void Control_WheelBalance(void)
 {
     float LQR_output = Control_WheelGetLQR();
     float YAW_output = Control_WheelGetYaw();
-    float target_L = -0.15 * (LQR_output + YAW_output);
-    float target_R = -0.15 * (LQR_output - YAW_output);
+    float target_L = -0.5 * (LQR_output + YAW_output);
+    float target_R = -0.5 * (LQR_output - YAW_output);
     Control_WheelSetFoc(target_L, target_R);
 }
 
