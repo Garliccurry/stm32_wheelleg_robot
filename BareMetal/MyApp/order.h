@@ -5,4 +5,5 @@
 
 extern uint8_t gCommand[RX_BUF_SIZE];
 
+void Order_ParseCommand(void);
 #endif

@@ -7,6 +7,8 @@
 
 static LPF_TypeDef g_LpfPower;
 
+static float g_Voltage = 7.4;
+
 void Battery_Init(void)
 {
     Filter_SetUp(&g_LpfPower, 7.5, 0.3);

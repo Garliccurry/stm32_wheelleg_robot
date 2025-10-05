@@ -9,7 +9,7 @@
 #include <string.h>
 
 /* 配置宏定义 */
-#define CONFIG_LOG_BUF_SIZE  256u
+#define CONFIG_LOG_BUF_SIZE  TX_BUF_SIZE
 #define CONFIG_LOG_DEF_LEVEL LOG_LEVEL_DEBUG
 #define LOG_NEWLINE_SIGN     "\r\n" // STM32串口常用换行符
 
@@ -55,7 +55,6 @@ typedef enum {
 /* 日志输出函数类型 */
 typedef void (*logOutputFunc)(uint8_t *data, uint16_t size);
 
-void Log_RegisterOutput(logOutputFunc func);
-void Log_SetFormat(uint32_t fmt);
+void Log_Init(void);
 void Log_Print(uint32_t level, const char *func, uint32_t line, const char *fmt, ...);
 #endif

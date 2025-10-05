@@ -110,8 +110,7 @@ int main(void)
     MX_TIM1_Init();
     /* USER CODE BEGIN 2 */
 
-    Log_RegisterOutput(Usart_LogPrint);
-    Log_SetFormat(0);
+    Log_Init();
 
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff, RX_BUF_SIZE);
 

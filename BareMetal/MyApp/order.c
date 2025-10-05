@@ -7,7 +7,7 @@ uint8_t gCommand[RX_BUF_SIZE];
 int  g_speed = 0;
 void Order_ParseCommand(void)
 {
-    if (g_flagUsartRec == WLR_Act) {
+    if (g_flagUart1Recv == WLR_Act) {
         // if (gCommand[0] == 0x31) {
         //     pos_left += 6;
         // } else if (gCommand[3] == 0x32) {
@@ -41,6 +41,6 @@ void Order_ParseCommand(void)
         //     break;
         // }
         HAL_UART_Transmit(&huart1, gCommand, RX_BUF_SIZE, 1000);
-        g_flagUsartRec = WLR_Idle;
+        g_flagUart1Recv = WLR_Idle;
     }
 }

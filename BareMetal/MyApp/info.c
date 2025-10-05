@@ -7,7 +7,8 @@
 #include "filter.h"
 #include "battery.h"
 #include "driver_led.h"
-uint8_t g_flagUsartRec = WLR_Idle;
+uint8_t g_flagUart1Recv = WLR_Idle;
+uint8_t g_flagUart1Send = WLR_Idle;
 uint8_t g_flagFatalErr = WLR_Off;
 uint8_t g_flagI2cError = WLR_Off;
 uint8_t g_flagUart2Bus = WLR_UsartIdle;
@@ -23,8 +24,6 @@ MpuData_t g_MPUdata;
 
 FilterSet g_lpfSet = {0};
 PIDSet    g_pidSet = {0};
-
-float g_Voltage = 7.4;
 
 static uint32_t g_usTick = 0;
 

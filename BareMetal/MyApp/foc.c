@@ -142,7 +142,6 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
     SetTorque(m_R, m_R->Vpwr, _3PI_2);
     HAL_Delay(100);
 
-    LOG_DEBUG("Left Zero ele angle ret:%d", status);
     uint8_t  asrawdataL[AS5600_I2C_DATASIZE] = {0}, asrawdataR[AS5600_I2C_DATASIZE] = {0};
     uint16_t asu16dataL, asu16dataR;
     status |= AS5600_NorReadData(m_L->as_dev, asrawdataL);
@@ -151,10 +150,8 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
     asu16dataR = (uint16_t)asrawdataR[0] << 8 | asrawdataR[1];
     float angleL = AS5600_GetAngFromRaw(asu16dataL);
     float angleR = AS5600_GetAngFromRaw(asu16dataR);
-    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
     m_L->Z_ElecAngle = Closeloop_ElecAngle(m_L, angleL);
     m_R->Z_ElecAngle = Closeloop_ElecAngle(m_R, angleR);
-    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
 
     SetTorque(m_L, 0, 0);
     SetTorque(m_R, 0, 0);

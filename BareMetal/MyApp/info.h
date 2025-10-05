@@ -94,7 +94,8 @@ typedef enum {
     WLR_ERR65543,        // empty point fail
 } WLR_ErrorCode;
 
-extern uint8_t g_flagUsartRec;
+extern uint8_t g_flagUart1Recv;
+extern uint8_t g_flagUart1Send;
 extern uint8_t g_flagFatalErr;
 extern uint8_t g_flagI2cError;
 extern uint8_t g_flagUart2Bus;
@@ -103,8 +104,6 @@ extern uint8_t g_flagFocDate;
 extern uint8_t g_flagMpuDate;
 
 extern uint32_t g_I2cErrorCount;
-
-extern float g_Voltage;
 
 extern AsData_t  g_ASdataL;
 extern AsData_t  g_ASdataR;
