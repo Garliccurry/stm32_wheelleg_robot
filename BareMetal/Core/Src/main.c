@@ -30,6 +30,7 @@
 #include "battery.h"
 #include "log.h"
 #include "foc.h"
+#include "order.h"
 #include "sensor.h"
 #include "control.h"
 #include "softtimer.h"
@@ -129,7 +130,7 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        Uart_ParseCommand();
+        Order_ParseCommand();
         Sensor_GetMpuData();
         Sensor_GetFocData();
         Control_MotionMove();

@@ -39,7 +39,8 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
-#define RX_BUF_SIZE 4
+#define RX_BUF_SIZE  32
+#define RX_THRESHOLD 8
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);
@@ -49,7 +50,7 @@ void MX_USART2_UART_Init(void);
 extern uint8_t gRxBuff[RX_BUF_SIZE];
 
 void     Usart_LogPrint(uint8_t *ch, uint16_t len);
-void     Uart_ParseCommand(void);
+void     Order_ParseCommand(void);
 void     FTUart_Send(uint8_t *nDat, int nLen);
 int      FTUart_Read(uint8_t *nDat, int nLen);
 uint32_t FTBus_Delay(void);

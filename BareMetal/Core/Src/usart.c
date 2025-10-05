@@ -221,8 +221,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 /* USER CODE BEGIN 1 */
 #include "foc.h"
 #include "log.h"
-uint8_t        gRxBuff[RX_BUF_SIZE];
-static uint8_t gCommand[RX_BUF_SIZE];
+#include "order.h"
+uint8_t gRxBuff[RX_BUF_SIZE];
 #ifdef __GNUC__
 /* With GCC, small printf (option LD Linker->Libraries->Small printf
    set to 'Yes') calls __io_putchar() */
@@ -255,10 +255,12 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
     if (huart->Instance == USART1) {
-        if (Size == RX_BUF_SIZE) {
-            for (int i = 0; i < RX_BUF_SIZE; i++) {
-                gCommand[i] = gRxBuff[i];
-            }
+        if (Size >= RX_THRESHOLD) {
+            // for (int i = 0; i < RX_BUF_SIZE; i++) {
+            //     gCommand[i] = gRxBuff[i];
+            // }
+            memcpy(gCommand, gRxBuff, Size);
+            memset(gCommand + Size, 0, RX_BUF_SIZE - Size);
             g_flagUsartRec = WLR_Act;
         }
         HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
@@ -280,45 +282,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 void Usart_LogPrint(uint8_t *ch, uint16_t len)
 {
     HAL_UART_Transmit(&huart1, ch, len, 10000);
-}
-
-int  g_speed = 0;
-void Uart_ParseCommand(void)
-{
-    if (g_flagUsartRec == WLR_Act) {
-        // if (gCommand[0] == 0x31) {
-        //     pos_left += 6;
-        // } else if (gCommand[3] == 0x32) {
-        //     g_vel += 10.f;
-        //     printf("%f\r\n", g_vel);
-        // } else if (gCommand[3] == 0x33) {
-        //     g_vel -= 10.f;
-        //     printf("%f\r\n", g_vel);
-        // } else if (gCommand[3] == 0x34) {
-        //     g_hight += 10;
-        //     printf("%d\r\n", g_hight);
-        // } else if (gCommand[3] == 0x35) {
-        //     g_hight -= 10;
-        //     printf("%d\r\n", g_hight);
-        // } else if (gCommand[3] == 0x36) {
-        //     wheel_run = ~wheel_run;
-        //     MOTOR_L_TOGGLE;
-        //     MOTOR_R_TOGGLE;
-        // }
-        switch (gCommand[3]) {
-        case '1':
-            g_speed += 1;
-            LOG_DEBUG("INC SPEED +: %f", g_speed);
-            break;
-        case '2':
-            g_speed -= 1;
-            LOG_DEBUG("DEC SPEED -: %f", g_speed);
-            break;
-        default:
-            break;
-        }
-        g_flagUsartRec = WLR_Idle;
-    }
 }
 
 void FTUart_Send(uint8_t *nDat, int nLen)

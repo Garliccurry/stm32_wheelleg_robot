@@ -78,6 +78,7 @@ MyLib/softtimer.c \
 MyLib/device.c \
 MyLib/filter.c \
 MyLib/cirbuf.c \
+MyLib/order.c \
 MyLib/pid.c \
 MyApp/battery.c \
 MyApp/control.c \
