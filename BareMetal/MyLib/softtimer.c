@@ -29,8 +29,12 @@ void SoftwareTimer_Init(void)
 
     Battery_Init();
 
-    uint8_t timer1 = SoftwareTimer_Create(250, Info_TimerCallback, WLR_OK);
+    uint8_t timer1 = SoftwareTimer_Create(250, Info_TimerCallbackBattery, WLR_OK);
+    timerCount++;
+    uint8_t timer2 = SoftwareTimer_Create(100, Info_TimerCallbackFatal, WLR_OK);
+    timerCount++;
     SoftwareTimer_Start(timer1);
+    SoftwareTimer_Start(timer2);
 }
 
 // 创建软件定时器

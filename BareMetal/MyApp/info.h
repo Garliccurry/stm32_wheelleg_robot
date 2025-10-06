@@ -17,6 +17,10 @@
 #define MPU_BUF_LEN 5
 
 #define PI 3.1415926
+
+#define RX_BUF_SIZE  128U
+#define RX_THRESHOLD 8U
+#define TX_BUF_SIZE  256U
 /**************    CONSTANTS, MACROS, & DATA STRUCTURES    ***************/
 
 typedef struct {
@@ -70,6 +74,12 @@ typedef struct
     uint16_t speed[2];
 } SCSData_t;
 
+typedef struct
+{
+    uint8_t buff[RX_BUF_SIZE];
+    uint8_t size;
+} Command_t;
+
 typedef enum {
     WLR_Idle = 0,
     WLR_Act,
@@ -96,6 +106,7 @@ typedef enum {
 
 extern uint8_t g_flagUart1Recv;
 extern uint8_t g_flagUart1Send;
+extern uint8_t g_flagUart1Prefix;
 extern uint8_t g_flagFatalErr;
 extern uint8_t g_flagI2cError;
 extern uint8_t g_flagUart2Bus;
@@ -112,9 +123,12 @@ extern MpuData_t g_MPUdata;
 extern FilterSet g_lpfSet;
 extern PIDSet    g_pidSet;
 
+extern Command_t g_command;
+
 /***********************    FUNCTION PROTOTYPES    ***********************/
 
-void Info_TimerCallback(void);
+void Info_TimerCallbackBattery(void);
+void Info_TimerCallbackFatal(void);
 void Info_ProcessAffair(void);
 
 void     Info_UsTickIncrease(void);

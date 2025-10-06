@@ -244,6 +244,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 #include "foc.h"
 #include "log.h"
 #include "order.h"
+#include "esp8266.h"
 uint8_t gRxBuff[RX_BUF_SIZE];
 uint8_t gTxBuff[TX_BUF_SIZE];
 #ifdef __GNUC__
@@ -272,18 +273,37 @@ int _write(int file, char *ptr, int len)
 }
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-    LOG_ERROR("USART ERR: %d", huart->ErrorCode);
+    // LOG_ERROR("USART ERR: %d", huart->ErrorCode);
+    uint32_t error_code = huart->ErrorCode;
+    // 检查噪声错误
+    if (error_code & HAL_UART_ERROR_NE) {
+        // 清除错误标志
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_NE);
+    }
+
+    // 检查帧错误
+    if (error_code & HAL_UART_ERROR_FE) {
+        // 清除错误标志
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_FE);
+    }
+
+    // 重新启动UART
+    HAL_UART_DeInit(huart);
+    HAL_UART_Init(huart);
+
+    // 重新开启接收（如果使用中断或DMA）
+    HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
     if (huart->Instance == USART1) {
+        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
         if (Size >= RX_THRESHOLD) {
-            memcpy(gCommand, gRxBuff, Size);
-            memset(gCommand + Size, 0, RX_BUF_SIZE - Size);
+            memcpy(g_command.buff, gRxBuff, Size);
+            g_command.size = Size;
             g_flagUart1Recv = WLR_Act;
         }
-        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
         if (status != HAL_OK) {
             LOG_ERROR("UASRT1 recieve error, ret:%d", status);
         }
@@ -301,16 +321,21 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 void Usart_NorLogPrint(uint8_t *ch, uint16_t len)
 {
+    if (g_flagUart1Prefix != WLR_Off) {
+        if (ESP8266_ServerPresend(len) != WLR_OK) {
+            g_flagFatalErr = WLR_On;
+        }
+    }
     HAL_UART_Transmit(&huart1, ch, len, 10000);
 }
 
 void Usart_DmaLogPrint(uint8_t *ch, uint16_t len)
 {
-    // uint32_t timestramp = HAL_GetTick();
+    uint32_t timestramp = HAL_GetTick();
     while (g_flagUart1Send == WLR_Act) {
-        // if (HAL_GetTick() - timestramp > 10000) {
-        //     return;
-        // }
+        if (HAL_GetTick() - timestramp > 10000) {
+            return;
+        }
     }
     memcpy(gTxBuff, ch, len);
     g_flagUart1Send = WLR_Act;
@@ -348,5 +373,10 @@ uint32_t FTBus_Delay(void)
         }
     }
     return WLR_OK;
+}
+
+void Usart_StartRecvByIdle(void)
+{
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff, RX_BUF_SIZE);
 }
 /* USER CODE END 1 */

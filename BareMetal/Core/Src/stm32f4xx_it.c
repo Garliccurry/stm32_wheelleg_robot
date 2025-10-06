@@ -92,8 +92,8 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
     /* USER CODE BEGIN HardFault_IRQn 0 */
-    uint32_t cfsr = SCB->CFSR; // 获取错误原因
-    LOG_ERROR("HardFault: CFSR=0x%08X\n", cfsr);
+    // uint32_t cfsr = SCB->CFSR; // 获取错误原因
+    // LOG_ERROR("HardFault: CFSR=0x%08X\n", cfsr);
     /* USER CODE END HardFault_IRQn 0 */
     while (1) {
         /* USER CODE BEGIN W1_HardFault_IRQn 0 */

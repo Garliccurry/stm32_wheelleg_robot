@@ -353,7 +353,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2) {
         Sensor_TimerGetSensor();
-        SoftwareTimer_Update();
     }
     if (htim->Instance == TIM1) {
         // Control_LeggedBalance();

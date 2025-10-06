@@ -70,6 +70,8 @@ third/SCSLib/SCSerail.c \
 third/SCSLib/SMS_STS.c \
 third/SCSLib/SCSCL.c \
 third/SCSLib/SCS.c \
+third/ESPLib/esp8266.c \
+third/ESPLib/esp8266_usart.c \
 Core/Src/system_stm32f4xx.c \
 MyDrivers/driver_mpu6050.c \
 MyDrivers/driver_as5600.c \
@@ -152,6 +154,7 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
 -IDrivers/CMSIS/Include \
 -Ithird/SCSLib \
+-Ithird/ESPLib \
 -IMyDrivers \
 -IMyLib \
 -IMyApp

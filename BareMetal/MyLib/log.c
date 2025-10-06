@@ -25,7 +25,11 @@ void Log_Init(void)
 {
     Log_SetLevel(CONFIG_LOG_DEF_LEVEL);
     Log_SetFormat(LOG_FMT_FUNC_LINE);
-    Log_RegisterOutput(Usart_DmaLogPrint);
+    if (g_flagUart1Prefix != WLR_Off) {
+        Log_RegisterOutput(Usart_NorLogPrint);
+    } else {
+        Log_RegisterOutput(Usart_DmaLogPrint);
+    }
     g_flagUart1Send = WLR_Idle;
 }
 

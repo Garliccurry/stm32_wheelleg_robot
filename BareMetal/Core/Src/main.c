@@ -110,9 +110,8 @@ int main(void)
     MX_TIM1_Init();
     /* USER CODE BEGIN 2 */
 
+    Order_Init();
     Log_Init();
-
-    HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff, RX_BUF_SIZE);
 
     HAL_Delay(1000);
     PID_Init();
@@ -129,6 +128,8 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
+
+        SoftwareTimer_Update();
         Order_ParseCommand();
         Sensor_GetMpuData();
         Sensor_GetFocData();

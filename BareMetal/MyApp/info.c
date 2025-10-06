@@ -9,6 +9,7 @@
 #include "driver_led.h"
 uint8_t g_flagUart1Recv = WLR_Idle;
 uint8_t g_flagUart1Send = WLR_Idle;
+uint8_t g_flagUart1Prefix = WLR_Off;
 uint8_t g_flagFatalErr = WLR_Off;
 uint8_t g_flagI2cError = WLR_Off;
 uint8_t g_flagUart2Bus = WLR_UsartIdle;
@@ -24,6 +25,8 @@ MpuData_t g_MPUdata;
 
 FilterSet g_lpfSet = {0};
 PIDSet    g_pidSet = {0};
+
+Command_t g_command = {0};
 
 static uint32_t g_usTick = 0;
 
@@ -41,7 +44,7 @@ static void Info_I2cBusyHandler(void)
     }
 }
 
-void Info_TimerCallback(void)
+void Info_TimerCallbackBattery(void)
 {
     static uint8_t base_cnt = 0;
     static uint8_t target_num = 4;
@@ -58,6 +61,13 @@ void Info_TimerCallback(void)
     base_cnt++;
 }
 
+void Info_TimerCallbackFatal(void)
+{
+    if (g_flagFatalErr != WLR_Off) {
+        Led_Toggle();
+    }
+}
+
 static void Info_I2cErrRecovery(void)
 {
     if (HAL_I2C_GetState(&hi2c3) == HAL_I2C_STATE_BUSY) {
@@ -67,6 +77,7 @@ static void Info_I2cErrRecovery(void)
         MX_I2C3_Init();
     }
 }
+
 void Info_ProcessAffair(void)
 {
     Info_I2cErrRecovery();
