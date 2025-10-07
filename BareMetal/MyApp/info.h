@@ -19,7 +19,7 @@
 #define PI 3.1415926
 
 #define RX_BUF_SIZE  128U
-#define RX_THRESHOLD 8U
+#define RX_THRESHOLD 2U
 #define TX_BUF_SIZE  256U
 /**************    CONSTANTS, MACROS, & DATA STRUCTURES    ***************/
 

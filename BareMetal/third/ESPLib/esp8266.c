@@ -36,18 +36,18 @@ static uint32_t ESP8266_SendATCmd(char *cmd, char *ack, uint32_t timeout)
 
 uint32_t ESP8266_Restore(void)
 {
-    uint32_t ret = ESP8266_SendATCmd("AT+RESTORE", NULL, 0);
-    if (ret == WLR_OK) {
-        HAL_Delay(3000);
-        return WLR_OK;
-    }
+    uint32_t ret = ESP8266_SendATCmd("AT+RESTORE", "ready", 3000);
+    // if (ret == WLR_OK) {
+    //     HAL_Delay(3000);
+    //     return WLR_OK;
+    // }
     return ret;
 }
 
 uint32_t ESP8266_ATTest(void)
 {
     uint32_t ret = WLR_OK;
-    for (uint8_t i = 0; i < 10; i++) {
+    for (uint8_t i = 0; i < 3; i++) {
         ret = ESP8266_SendATCmd("AT", "OK", 500);
         RET_IF(ret == WLR_OK, WLR_OK);
     }
@@ -67,11 +67,11 @@ uint32_t ESP8266_SetMode(ESP8266_WifiMode mode)
 uint32_t ESP8266_SoftwareReset(void)
 {
     uint32_t ret = WLR_OK;
-    ret = ESP8266_SendATCmd("AT+RST", NULL, 0);
-    if (ret == WLR_OK) {
-        HAL_Delay(3000);
-        return WLR_OK;
-    }
+    ret = ESP8266_SendATCmd("AT+RST", "ready", 3000);
+    // if (ret == WLR_OK) {
+    //     HAL_Delay(3000);
+    //     return WLR_OK;
+    // }
     return ret;
 }
 
@@ -162,7 +162,9 @@ uint32_t ESP8266_EnterUnvarnished(void)
 void ESP8266_ExitUnvarnished(void)
 {
     ESP8266usart_Printf("+++");
-    HAL_Delay(1000);
+    HAL_Delay(10);
+    ESP8266usart_Printf("\r\n");
+    HAL_Delay(10);
 }
 
 uint32_t ESP8266_ServerPresend(uint8_t size)
@@ -187,7 +189,7 @@ uint32_t ESP8266_DisconnectAtkCloud(void)
 void ESP8266_Init(ESP8266_WifiMode mode, ESP8266_Endpoint role)
 {
     uint32_t ret = WLR_OK;
-    ESP8266usart_Reset();
+    ESP8266_ExitUnvarnished();
 #ifdef IMU_BOARD_2
     ESP8266_HardwareReset(); // only use for verson2.0 IMU board 仅仅可以在2.0版本后的IMU板子使用
 #endif

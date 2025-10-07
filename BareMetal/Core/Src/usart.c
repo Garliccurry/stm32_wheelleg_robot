@@ -245,8 +245,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 #include "log.h"
 #include "order.h"
 #include "esp8266.h"
-uint8_t gRxBuff[RX_BUF_SIZE];
+uint8_t gRxBuff[2][RX_BUF_SIZE];
 uint8_t gTxBuff[TX_BUF_SIZE];
+uint8_t gRxIdx = 0;
 #ifdef __GNUC__
 /* With GCC, small printf (option LD Linker->Libraries->Small printf
    set to 'Yes') calls __io_putchar() */
@@ -273,39 +274,34 @@ int _write(int file, char *ptr, int len)
 }
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-    // LOG_ERROR("USART ERR: %d", huart->ErrorCode);
     uint32_t error_code = huart->ErrorCode;
-    // 检查噪声错误
     if (error_code & HAL_UART_ERROR_NE) {
-        // 清除错误标志
         __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_NE);
     }
-
-    // 检查帧错误
     if (error_code & HAL_UART_ERROR_FE) {
-        // 清除错误标志
         __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_FE);
     }
-
-    // 重新启动UART
-    HAL_UART_DeInit(huart);
-    HAL_UART_Init(huart);
-
-    // 重新开启接收（如果使用中断或DMA）
-    HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
+    if (error_code & HAL_UART_ERROR_ORE) {
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_ORE);
+    }
+    HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff[gRxIdx], RX_BUF_SIZE);
+    gRxIdx = (gRxIdx == 0) ? 1 : 0;
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
     if (huart->Instance == USART1) {
-        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
-        if (Size >= RX_THRESHOLD) {
-            memcpy(g_command.buff, gRxBuff, Size);
-            g_command.size = Size;
-            g_flagUart1Recv = WLR_Act;
-        }
+        uint8_t rx_idx = (gRxIdx == 0) ? 1 : 0;
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_NE | UART_FLAG_FE | UART_FLAG_ORE);
+        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff[rx_idx], RX_BUF_SIZE);
         if (status != HAL_OK) {
             LOG_ERROR("UASRT1 recieve error, ret:%d", status);
+        }
+        if (Size >= RX_THRESHOLD) {
+            memcpy(g_command.buff, gRxBuff[gRxIdx], Size);
+            gRxIdx = rx_idx;
+            g_command.size = Size;
+            g_flagUart1Recv = WLR_Act;
         }
     }
 }
