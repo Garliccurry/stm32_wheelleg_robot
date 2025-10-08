@@ -120,7 +120,7 @@ void Sensor_GetMpuData(void)
     static MpuRawData_t rawdata;
     if (CirBuf_MpuDataRead(&g_CirMpuRawBuff, &rawdata) == WLR_OK) {
         MPU6050_GetData(&g_MPUdata, rawdata.data);
-        // LOG_DEBUG("%f,%f,%f", g_MPUdata.accX, g_MPUdata.accY, g_MPUdata.accZ);
+        // LOG_DEBUG("%f,%f,%f", g_MPUdata.angleX, g_MPUdata.angleY, g_MPUdata.angleZ);
         g_flagMpuDate = WLR_Act;
     }
 }
@@ -138,6 +138,4 @@ void Sensor_Init(void)
 
     AS5600_Init();
     MPU6050_Init();
-
-    HAL_TIM_Base_Start_IT(&htim2);
 }

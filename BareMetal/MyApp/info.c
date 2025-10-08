@@ -19,9 +19,9 @@ uint8_t g_flagMpuDate = WLR_Idle;
 
 uint32_t g_I2cErrorCount = 0;
 
-AsData_t  g_ASdataL;
-AsData_t  g_ASdataR;
-MpuData_t g_MPUdata;
+AsData_t  g_ASdataL = {0};
+AsData_t  g_ASdataR = {0};
+MpuData_t g_MPUdata = {0};
 
 FilterSet g_lpfSet = {0};
 PIDSet    g_pidSet = {0};

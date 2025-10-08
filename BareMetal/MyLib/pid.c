@@ -89,7 +89,7 @@ void PID_Init(void)
         return;
     }
 
-    PID_SetUp(pidSet->angle, 0.25, 0, 0, 100000, 8);
+    PID_SetUp(pidSet->angle, 0.28, 0, 0, 100000, 8);
     PID_SetUp(pidSet->distance, 0.5, 0, 0, 100000, 8);
     PID_SetUp(pidSet->gyro, 0.02, 0, 0, 100000, 8);
     PID_SetUp(pidSet->lqr_u, 1, 0, 0, 100000, 8);

@@ -15,6 +15,7 @@ static Motor_TypeDef motor_L, motor_R;
 
 void Control_Init(void)
 {
+    g_MPUdata.angleY_zeropoint = 8;
     // memset(&wlrobot, 0, sizeof(WLrobot));
     wlrobot.go = false;
     wlrobot.joyx = 0;
@@ -29,8 +30,8 @@ void Control_LeggedBalance(void)
 {
     scsdata.ID[0] = 1;
     scsdata.ID[1] = 2;
-    scsdata.position[0] = 2048;
-    scsdata.position[1] = 2048;
+    scsdata.position[0] = 2048 - 20;
+    scsdata.position[1] = 2048 + 10;
     scsdata.time[0] = 0;
     scsdata.time[1] = 0;
     scsdata.speed[0] = 1500;
@@ -41,13 +42,14 @@ void Control_LeggedBalance(void)
 
 static float Control_WheelGetLQR(void)
 {
-    static float angle_zeropoint = 8.0f;
+    static float angle_zeropoint = 6.5f;
     static float distance_zeropoint = 0;
     static float robot_speed = 0;      //记录当前轮部转速
     static float robot_speed_last = 0; //记录上一时刻的轮部转速
 
     FilterSet *lpfSet = &g_lpfSet;
     PIDSet    *pidSet = &g_pidSet;
+    angle_zeropoint = g_MPUdata.angleY_zeropoint;
 
     float shaft_ang_L = Filter_LpfControl(lpfSet->ang_shaftL, g_ASdataL.angle_pre);
     float shaft_ang_R = Filter_LpfControl(lpfSet->ang_shaftR, g_ASdataR.angle_pre);
@@ -104,7 +106,7 @@ static float Control_WheelGetLQR(void)
     } else {
         pidSet->speed->Kp = 0.5;
     }
-
+    LQR_output = angle_control + gyro_control;
     // LOG_INFO("%f,%f,%f,%f", LQR_angle, LQR_gyro, angle_control, gyro_control);
     return LQR_output;
 }

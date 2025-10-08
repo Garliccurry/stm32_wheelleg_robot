@@ -327,12 +327,13 @@ void Usart_NorLogPrint(uint8_t *ch, uint16_t len)
 
 void Usart_DmaLogPrint(uint8_t *ch, uint16_t len)
 {
-    uint32_t timestramp = HAL_GetTick();
-    while (g_flagUart1Send == WLR_Act) {
-        if (HAL_GetTick() - timestramp > 10000) {
-            return;
-        }
-    }
+    // uint32_t timestramp = HAL_GetTick();
+    // while (g_flagUart1Send == WLR_Act) {
+    //     if (HAL_GetTick() - timestramp > 10000) {
+    //         return;
+    //     }
+    // }
+    RET_IF(g_flagUart1Send == WLR_Act);
     memcpy(gTxBuff, ch, len);
     g_flagUart1Send = WLR_Act;
     HAL_UART_Transmit_DMA(&huart1, gTxBuff, len);

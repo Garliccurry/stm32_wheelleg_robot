@@ -38,11 +38,10 @@
 typedef struct Motor_TypeDef {
     TIM_HandleTypeDef *htim;
 
-    float PP;
-    float sDIR;
-    float mDIR;
-    float Vpwr;
-    float Z_ElecAngle;
+    float          PP;
+    volatile float sDIR;
+    float          Vpwr;
+    volatile float Z_ElecAngle;
 
     PID_TypeDef *pid_vel;
     PID_TypeDef *pid_pos;

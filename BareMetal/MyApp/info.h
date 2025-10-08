@@ -50,6 +50,7 @@ typedef struct
     float    angleX;
     float    angleY;
     float    angleZ;
+    float    angleY_zeropoint;
     float    gyroCoef;
     float    accCoef;
     uint32_t us_ts;
@@ -102,6 +103,7 @@ typedef enum {
     WLR_ERR65541,        // MPU6050 initial data timeout
     WLR_ERR65542,        // AS5600 initial data timeout
     WLR_ERR65543,        // empty point fail
+    WLR_ERR65544,        // vailed char convert to float
 } WLR_ErrorCode;
 
 extern uint8_t g_flagUart1Recv;

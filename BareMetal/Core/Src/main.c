@@ -120,6 +120,7 @@ int main(void)
     Control_Init();
     SoftwareTimer_Init();
     Info_Init();
+    HAL_TIM_Base_Start_IT(&htim2);
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -135,6 +136,8 @@ int main(void)
         Sensor_GetFocData();
         Control_MotionMove();
         Info_ProcessAffair();
+
+        // LOG_DEBUG("%f,%f", g_ASdataL.shaft_vel, g_ASdataR.shaft_vel);
 
         // HAL_Delay(1000);
         // LOG_ERROR("Info_GetUsTick: %d", Info_GetUsTick());
