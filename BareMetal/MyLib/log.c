@@ -24,7 +24,7 @@ static void Log_SetLevel(uint32_t level)
 void Log_Init(void)
 {
     Log_SetLevel(CONFIG_LOG_DEF_LEVEL);
-    Log_SetFormat(LOG_FMT_FUNC_LINE);
+    Log_SetFormat(LOG_FMT_LEVEL_STR);
     if (g_flagUart1Prefix != WLR_Off) {
         Log_RegisterOutput(Usart_NorLogPrint);
     } else {
@@ -57,7 +57,7 @@ void Log_Print(uint32_t level, const char *func, uint32_t line, const char *form
     int     idx = 0;
 
     if (g_log_format & LOG_FMT_LEVEL_STR) {
-        static const char *level_str[] = {"DEBUG", "INFO ", "ERROR"};
+        static const char *level_str[] = {"DEBUG", "INFO ", "WARN", "ERROR"};
         idx += snprintf(log_buf + idx, sizeof(log_buf) - idx, "[%s]", level_str[level]);
     }
 

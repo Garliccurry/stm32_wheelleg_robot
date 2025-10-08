@@ -17,6 +17,7 @@
 typedef enum {
     LOG_LEVEL_DEBUG = 0,
     LOG_LEVEL_INFO,
+    LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR,
     LOG_LEVEL_BOTTOM
 } log_level_t;
@@ -30,6 +31,7 @@ typedef enum {
 /* 启用日志级别开关 */
 #define LOG_DEBUG_EN 1
 #define LOG_INFO_EN  1
+#define LOG_WARN_EN  1
 #define LOG_ERROR_EN 1
 
 /* 日志宏定义 */
@@ -44,6 +46,12 @@ typedef enum {
 #define LOG_INFO(fmt, ...) Log_Print(LOG_LEVEL_INFO, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define LOG_INFO(fmt, ...)
+#endif
+
+#if LOG_WARN_EN
+#define LOG_WARN(fmt, ...) Log_Print(LOG_LEVEL_WARN, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#else
+#define LOG_WARN(fmt, ...)
 #endif
 
 #if LOG_ERROR_EN
