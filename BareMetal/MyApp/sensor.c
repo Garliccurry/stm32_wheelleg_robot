@@ -116,9 +116,10 @@ void Sensor_GetFocData(void)
 void Sensor_GetMpuData(void)
 {
     static MpuRawData_t rawdata;
+
+    MpuData_t *MPUdata = Info_GetMpuData();
     if (CirBuf_MpuDataRead(&g_CirMpuRawBuff, &rawdata) == WLR_OK) {
-        MPU6050_GetData(&g_MPUdata, rawdata.data);
-        // LOG_DEBUG("%f,%f,%f", g_MPUdata.angleX, g_MPUdata.angleY, g_MPUdata.angleZ);
+        MPU6050_GetData(MPUdata, rawdata.data);
         g_flagMpuDate = WLR_Act;
     }
 }

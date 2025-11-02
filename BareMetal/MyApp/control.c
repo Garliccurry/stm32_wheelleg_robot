@@ -15,7 +15,8 @@ static Motor_TypeDef motor_L, motor_R;
 
 void Control_Init(void)
 {
-    g_MPUdata.angleY_zeropoint = 8.5;
+    MpuData_t *MPUdata = Info_GetMpuData();
+    MPUdata->angleY_zeropoint = 8.5;
     // memset(&wlrobot, 0, sizeof(WLrobot));
     wlrobot.go = false;
     wlrobot.joyx = 0;
@@ -50,9 +51,10 @@ static float Control_WheelGetLQR(void)
     FilterSet *lpfSet = &g_lpfSet;
     PIDSet    *pidSet = &g_pidSet;
 
-    AsData_t *ASdataL = Info_GetAsData(AS5600Left);
-    AsData_t *ASdataR = Info_GetAsData(AS5600Right);
-    angle_zeropoint = g_MPUdata.angleY_zeropoint;
+    AsData_t  *ASdataL = Info_GetAsData(AS5600Left);
+    AsData_t  *ASdataR = Info_GetAsData(AS5600Right);
+    MpuData_t *MPUdata = Info_GetMpuData();
+    angle_zeropoint = MPUdata->angleY_zeropoint;
 
     float shaft_ang_L = Filter_LpfControl(lpfSet->ang_shaftL, ASdataL->angle_pre);
     float shaft_ang_R = Filter_LpfControl(lpfSet->ang_shaftR, ASdataR->angle_pre);
@@ -61,8 +63,8 @@ static float Control_WheelGetLQR(void)
 
     float LQR_distance = (-0.5) * (shaft_ang_L + shaft_ang_R);
     float LQR_speed = (-0.5) * (shaft_vel_L + shaft_vel_R);
-    float LQR_angle = g_MPUdata.angleY;
-    float LQR_gyro = Filter_LpfControl(lpfSet->gyroY, g_MPUdata.gyroY);
+    float LQR_angle = MPUdata->angleY;
+    float LQR_gyro = Filter_LpfControl(lpfSet->gyroY, MPUdata->gyroY);
     float LQR_output = 0;
 
     float angle_control = PID_PosController(pidSet->angle, LQR_angle - angle_zeropoint);

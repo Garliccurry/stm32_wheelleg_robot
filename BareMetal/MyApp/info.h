@@ -108,8 +108,6 @@ extern uint8_t g_flagMpuDate;
 
 extern uint32_t g_I2cErrorCount;
 
-extern MpuData_t g_MPUdata;
-
 extern FilterSet g_lpfSet;
 extern PIDSet    g_pidSet;
 
