@@ -12,7 +12,7 @@ static float NormalizeAngle(float ele_angle)
 
 static float Closeloop_ElecAngle(Motor_TypeDef *m, float angle)
 {
-    return NormalizeAngle((float)(m->sDIR * m->PP) * angle - (m->Z_ElecAngle)); // TODO(oujiali)运行一段时间后，同样倾斜角度两轮转速不一致，貌似是此处Z_ElecAngle导致的
+    return NormalizeAngle((float)(m->sDIR * m->PP) * angle - (m->Z_ElecAngle));
 }
 
 static void FOC_AlignSensor(Motor_TypeDef *m, float PP, float sDIR, float Vpwr)
@@ -51,7 +51,6 @@ static void FOC_AlignSensor(Motor_TypeDef *m, float PP, float sDIR, float Vpwr)
 
 void SetTorque(Motor_TypeDef *m, float Uq, float angle_el)
 {
-    // LOG_DEBUG("%f,%f", Uq, angle_el); // TODO(oujiali)正反转有问题
     angle_el = NormalizeAngle(angle_el);
     float Ualpha = -Uq * sin(angle_el);
     float Ubeta = Uq * cos(angle_el);

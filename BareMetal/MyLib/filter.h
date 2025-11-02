@@ -16,7 +16,7 @@ typedef struct LPF_TypeDef {
 typedef struct FilterSet {
     LPF_TypeDef *roll;
     LPF_TypeDef *zeropoint;
-    LPF_TypeDef *joyy; // TODO(oujiali) 这个还不知道放哪比较好
+    LPF_TypeDef *joyy; // TODO 这个还不知道放哪比较好
     LPF_TypeDef *ang_shaftL;
     LPF_TypeDef *vel_shaftL;
     LPF_TypeDef *ang_shaftR;
