@@ -48,7 +48,7 @@ static float Control_WheelGetLQR(void)
     static float robot_speed = 0;      //记录当前轮部转速
     static float robot_speed_last = 0; //记录上一时刻的轮部转速
 
-    FilterSet *lpfSet = &g_lpfSet;
+    FilterSet *lpfSet = Info_GetFilterSet();
     PIDSet    *pidSet = &g_pidSet;
 
     AsData_t  *ASdataL = Info_GetAsData(AS5600Left);
@@ -122,7 +122,7 @@ static float Control_WheelGetYaw(void)
 }
 static void Control_WheelSetFoc(float target_L, float target_R)
 {
-    FilterSet *lpfset = &g_lpfSet;
+    FilterSet *lpfset = Info_GetFilterSet();
     AsData_t  *ASdataL = Info_GetAsData(AS5600Left);
     AsData_t  *ASdataR = Info_GetAsData(AS5600Right);
     float      shaftL = Filter_LpfControl(lpfset->ang_shaftL, ASdataL->angle_pre);

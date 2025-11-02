@@ -38,11 +38,8 @@ float Filter_LpfControl(LPF_TypeDef *lpf, float input)
 void Filter_Init(void)
 {
     uint32_t   ret = WLR_OK;
-    FilterSet *lpfSet = NULL;
+    FilterSet *lpfSet = Info_GetFilterSet();
     do {
-        lpfSet = &g_lpfSet;
-        BREAK_IF(lpfSet == NULL, WLR_ERR65543);
-
         lpfSet->roll = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
         BREAK_IF(lpfSet->roll == NULL, WLR_ERR65540);
 

@@ -42,6 +42,11 @@ MpuData_t *Info_GetMpuData(void)
     return &g_MPUdata;
 }
 
+FilterSet *Info_GetFilterSet(void)
+{
+    return &g_lpfSet;
+}
+
 static uint32_t g_usTick = 0;
 
 static void Info_I2cBusyHandler(void)

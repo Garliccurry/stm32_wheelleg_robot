@@ -108,8 +108,7 @@ extern uint8_t g_flagMpuDate;
 
 extern uint32_t g_I2cErrorCount;
 
-extern FilterSet g_lpfSet;
-extern PIDSet    g_pidSet;
+extern PIDSet g_pidSet;
 
 extern Command_t g_command;
 
@@ -125,4 +124,5 @@ void     Info_Init(void);
 
 AsData_t  *Info_GetAsData(AS5600Dir dir);
 MpuData_t *Info_GetMpuData(void);
+FilterSet *Info_GetFilterSet(void);
 #endif
