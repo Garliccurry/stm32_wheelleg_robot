@@ -49,7 +49,7 @@ static float Control_WheelGetLQR(void)
     static float robot_speed_last = 0; //记录上一时刻的轮部转速
 
     FilterSet *lpfSet = Info_GetFilterSet();
-    PIDSet    *pidSet = &g_pidSet;
+    PIDSet    *pidSet = Info_GetPidSet();
 
     AsData_t  *ASdataL = Info_GetAsData(AS5600Left);
     AsData_t  *ASdataR = Info_GetAsData(AS5600Right);

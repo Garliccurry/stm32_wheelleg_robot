@@ -47,6 +47,11 @@ FilterSet *Info_GetFilterSet(void)
     return &g_lpfSet;
 }
 
+PIDSet *Info_GetPidSet(void)
+{
+    return &g_pidSet;
+}
+
 static uint32_t g_usTick = 0;
 
 static void Info_I2cBusyHandler(void)

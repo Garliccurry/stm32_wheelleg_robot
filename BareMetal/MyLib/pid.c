@@ -51,11 +51,8 @@ static void PID_SetUp(PID_TypeDef *pid, float P, float I, float D, float ramp, f
 void PID_Init(void)
 {
     uint32_t ret = WLR_OK;
-    PIDSet  *pidSet = NULL;
+    PIDSet  *pidSet = Info_GetPidSet();
     do {
-        pidSet = &g_pidSet;
-        BREAK_IF(pidSet == NULL, WLR_ERR65543);
-
         pidSet->angle = (PID_TypeDef *)malloc(sizeof(PID_TypeDef));
         BREAK_IF(pidSet->angle == NULL, WLR_ERR65542);
 

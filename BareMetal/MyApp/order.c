@@ -30,7 +30,7 @@ static void Oreder_SetValue(uint8_t *pos, uint8_t len)
     cmd[len] = '\0';
     double num = atof(cmd);
     LOG_INFO("set value: %f", num);
-    PIDSet    *pidSet = &g_pidSet;
+    PIDSet    *pidSet = Info_GetPidSet();
     MpuData_t *MPUdata = Info_GetMpuData();
     if (S == 'A') {
         pidSet->angle->Kp = num;
