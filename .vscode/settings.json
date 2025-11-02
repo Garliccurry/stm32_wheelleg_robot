@@ -82,7 +82,8 @@
         "control.h": "c",
         "order.h": "c",
         "esp8266.h": "c",
-        "esp8266_usart.h": "c"
+        "esp8266_usart.h": "c",
+        "stdbool.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.formatting": "clangFormat",

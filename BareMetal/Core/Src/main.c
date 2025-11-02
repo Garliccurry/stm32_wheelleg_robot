@@ -137,8 +137,6 @@ int main(void)
         Control_MotionMove();
         Info_ProcessAffair();
 
-        // LOG_DEBUG("%f,%f", g_ASdataL.shaft_vel, g_ASdataR.shaft_vel);
-
         // HAL_Delay(1000);
         // LOG_ERROR("Info_GetUsTick: %d", Info_GetUsTick());
     }

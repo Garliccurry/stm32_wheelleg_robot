@@ -49,12 +49,15 @@ static float Control_WheelGetLQR(void)
 
     FilterSet *lpfSet = &g_lpfSet;
     PIDSet    *pidSet = &g_pidSet;
+
+    AsData_t *ASdataL = Info_GetAsData(AS5600Left);
+    AsData_t *ASdataR = Info_GetAsData(AS5600Right);
     angle_zeropoint = g_MPUdata.angleY_zeropoint;
 
-    float shaft_ang_L = Filter_LpfControl(lpfSet->ang_shaftL, g_ASdataL.angle_pre);
-    float shaft_ang_R = Filter_LpfControl(lpfSet->ang_shaftR, g_ASdataR.angle_pre);
-    float shaft_vel_L = Filter_LpfControl(lpfSet->vel_shaftL, g_ASdataL.shaft_vel);
-    float shaft_vel_R = Filter_LpfControl(lpfSet->vel_shaftR, g_ASdataR.shaft_vel);
+    float shaft_ang_L = Filter_LpfControl(lpfSet->ang_shaftL, ASdataL->angle_pre);
+    float shaft_ang_R = Filter_LpfControl(lpfSet->ang_shaftR, ASdataR->angle_pre);
+    float shaft_vel_L = Filter_LpfControl(lpfSet->vel_shaftL, ASdataL->shaft_vel);
+    float shaft_vel_R = Filter_LpfControl(lpfSet->vel_shaftR, ASdataR->shaft_vel);
 
     float LQR_distance = (-0.5) * (shaft_ang_L + shaft_ang_R);
     float LQR_speed = (-0.5) * (shaft_vel_L + shaft_vel_R);
@@ -118,9 +121,10 @@ static float Control_WheelGetYaw(void)
 static void Control_WheelSetFoc(float target_L, float target_R)
 {
     FilterSet *lpfset = &g_lpfSet;
-
-    float shaftL = Filter_LpfControl(lpfset->ang_shaftL, g_ASdataL.angle_pre);
-    float shaftR = Filter_LpfControl(lpfset->ang_shaftR, g_ASdataR.angle_pre);
+    AsData_t  *ASdataL = Info_GetAsData(AS5600Left);
+    AsData_t  *ASdataR = Info_GetAsData(AS5600Right);
+    float      shaftL = Filter_LpfControl(lpfset->ang_shaftL, ASdataL->angle_pre);
+    float      shaftR = Filter_LpfControl(lpfset->ang_shaftR, ASdataR->angle_pre);
 
     FOC_WheelBalance(&motor_L, target_L, shaftL);
     FOC_WheelBalance(&motor_R, target_R, shaftR);

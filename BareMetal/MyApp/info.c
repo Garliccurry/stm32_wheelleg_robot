@@ -28,6 +28,20 @@ PIDSet    g_pidSet = {0};
 
 Command_t g_command = {0};
 
+AsData_t *Info_GetAsData(AS5600Dir dir)
+{
+    if (dir == AS5600Left) {
+        return &g_ASdataL;
+    } else {
+        return &g_ASdataR;
+    }
+}
+
+MpuData_t *Info_GetMpuData(void)
+{
+    return &g_MPUdata;
+}
+
 static uint32_t g_usTick = 0;
 
 static void Info_I2cBusyHandler(void)

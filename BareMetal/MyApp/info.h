@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "filter.h"
 #include "pid.h"
+#include "driver_as5600.h"
 
 #define WLR_OK    0
 #define WLR_ERROR 1
@@ -58,17 +59,6 @@ typedef struct
 
 typedef struct
 {
-    float    angle_pre;
-    float    rotat_pre;
-    uint32_t angle_pre_us_ts;
-    float    angle_get_vel;
-    float    rotat_get_vel;
-    uint32_t angle_get_vel_us_ts;
-    float    shaft_vel;
-} AsData_t;
-
-typedef struct
-{
     uint8_t  ID[2];
     uint16_t position[2];
     uint16_t time[2];
@@ -118,8 +108,6 @@ extern uint8_t g_flagMpuDate;
 
 extern uint32_t g_I2cErrorCount;
 
-extern AsData_t  g_ASdataL;
-extern AsData_t  g_ASdataR;
 extern MpuData_t g_MPUdata;
 
 extern FilterSet g_lpfSet;
@@ -136,4 +124,7 @@ void Info_ProcessAffair(void);
 void     Info_UsTickIncrease(void);
 uint32_t Info_GetUsTick(void);
 void     Info_Init(void);
+
+AsData_t  *Info_GetAsData(AS5600Dir dir);
+MpuData_t *Info_GetMpuData(void);
 #endif
