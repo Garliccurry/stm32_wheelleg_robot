@@ -291,15 +291,15 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
     if (huart->Instance == USART1) {
-        uint8_t rx_idx = (gRxIdx == 0) ? 1 : 0;
+        uint8_t next_rx_idx = (gRxIdx == 0) ? 1 : 0;
         __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_NE | UART_FLAG_FE | UART_FLAG_ORE);
-        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff[rx_idx], RX_BUF_SIZE);
+        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff[next_rx_idx], RX_BUF_SIZE);
         if (status != HAL_OK) {
             LOG_ERROR("UASRT1 recieve error, ret:%d", status);
         }
         if (Size >= RX_THRESHOLD) {
             memcpy(g_command.buff, gRxBuff[gRxIdx], Size);
-            gRxIdx = rx_idx;
+            gRxIdx = next_rx_idx;
             g_command.size = Size;
             g_flagUart1Recv = WLR_Act;
         }
@@ -374,6 +374,6 @@ uint32_t FTBus_Delay(void)
 
 void Usart_StartRecvByIdle(void)
 {
-    HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff, RX_BUF_SIZE);
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff[gRxIdx], RX_BUF_SIZE);
 }
 /* USER CODE END 1 */
