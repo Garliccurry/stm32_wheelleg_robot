@@ -17,18 +17,20 @@ void ESP8266usart_Printf(char *fmt, ...)
 
 void ESP8266usart_Reset(void)
 {
-    g_command.size = 0;
+    Command_t *command = Info_GetUsartCommand();
+    command->size = 0;
     g_flagUart1Recv = WLR_Idle;
 }
 
 uint32_t ESP8266usart_GetRecvData(void)
 {
     if (g_flagUart1Recv == WLR_Act) {
-        if (g_command.size < RX_BUF_SIZE && g_command.size > 0) {
-            g_command.buff[g_command.size] = '\0';
+        Command_t *command = Info_GetUsartCommand();
+        if (command->size < RX_BUF_SIZE && command->size > 0) {
+            command->buff[command->size] = '\0';
             return WLR_OK;
         } else {
-            g_command.buff[RX_BUF_SIZE - 1] = '\0';
+            command->buff[RX_BUF_SIZE - 1] = '\0';
             return WLR_ERROR;
         }
     }

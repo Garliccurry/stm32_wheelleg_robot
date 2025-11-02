@@ -52,6 +52,11 @@ PIDSet *Info_GetPidSet(void)
     return &g_pidSet;
 }
 
+Command_t *Info_GetUsartCommand(void)
+{
+    return &g_command;
+}
+
 static uint32_t g_usTick = 0;
 
 static void Info_I2cBusyHandler(void)

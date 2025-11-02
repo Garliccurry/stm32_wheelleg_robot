@@ -14,6 +14,8 @@ static uint32_t ESP8266_SendATCmd(char *cmd, char *ack, uint32_t timeout)
     ESP8266usart_Reset();
     ESP8266usart_Printf("%s\r\n", cmd);
 
+    Command_t *command = Info_GetUsartCommand();
+
     uint32_t ret = WLR_OK;
     if (ack == NULL || timeout == 0) {
         return WLR_OK;
@@ -21,7 +23,7 @@ static uint32_t ESP8266_SendATCmd(char *cmd, char *ack, uint32_t timeout)
         while (timeout > 0) {
             ret = ESP8266usart_GetRecvData();
             if (ret == WLR_OK) {
-                if (strstr((const char *)g_command.buff, ack) != NULL) {
+                if (strstr((const char *)command->buff, ack) != NULL) {
                     return WLR_OK;
                 } else {
                     ESP8266usart_Reset();
@@ -110,9 +112,11 @@ uint32_t ESP8266_GetIp(char *buf)
     char    *p_start = NULL;
     char    *p_end = NULL;
 
+    Command_t *command = Info_GetUsartCommand();
+
     ret = ESP8266_SendATCmd("AT+CIFSR", "OK", 500);
     RET_IF(ret != WLR_OK, ret);
-    p_start = strstr((const char *)g_command.buff, "\"");
+    p_start = strstr((const char *)command->buff, "\"");
     p_end = strstr(p_start + 1, "\"");
     *p_end = '\0';
     sprintf(buf, "%s", p_start + 1);

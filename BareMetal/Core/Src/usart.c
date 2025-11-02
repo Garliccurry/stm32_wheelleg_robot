@@ -298,9 +298,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
             LOG_ERROR("UASRT1 recieve error, ret:%d", status);
         }
         if (Size >= RX_THRESHOLD) {
-            memcpy(g_command.buff, gRxBuff[gRxIdx], Size);
+            Command_t *command = Info_GetUsartCommand();
+            memcpy(command->buff, gRxBuff[gRxIdx], Size);
             gRxIdx = next_rx_idx;
-            g_command.size = Size;
+            command->size = Size;
             g_flagUart1Recv = WLR_Act;
         }
     }

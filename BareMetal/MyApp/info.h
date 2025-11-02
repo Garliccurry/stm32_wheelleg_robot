@@ -108,8 +108,6 @@ extern uint8_t g_flagMpuDate;
 
 extern uint32_t g_I2cErrorCount;
 
-extern Command_t g_command;
-
 /***********************    FUNCTION PROTOTYPES    ***********************/
 
 void Info_TimerCallbackBattery(void);
@@ -124,4 +122,5 @@ AsData_t  *Info_GetAsData(AS5600Dir dir);
 MpuData_t *Info_GetMpuData(void);
 FilterSet *Info_GetFilterSet(void);
 PIDSet    *Info_GetPidSet(void);
+Command_t *Info_GetUsartCommand(void);
 #endif

@@ -44,14 +44,15 @@ static void Oreder_SetValue(uint8_t *pos, uint8_t len)
 void Order_ParseCommand(void)
 {
     if (g_flagUart1Recv == WLR_Act) {
-        uint8_t *start_pos = g_command.buff;
-        uint8_t  cmd_len = g_command.size;
+        Command_t *command = Info_GetUsartCommand();
+        uint8_t   *start_pos = command->buff;
+        uint8_t    cmd_len = command->size;
         if (g_flagUart1Prefix != WLR_Off) {
-            start_pos = (uint8_t *)strstr((char *)g_command.buff, ":");
+            start_pos = (uint8_t *)strstr((char *)command->buff, ":");
             RET_IF(start_pos == NULL);
             start_pos++;
             RET_IF(start_pos == NULL);
-            cmd_len = g_command.size - (uint8_t)(g_command.buff - start_pos);
+            cmd_len = command->size - (uint8_t)(command->buff - start_pos);
             RET_IF(cmd_len <= 0);
         }
         HAL_UART_Transmit(&huart1, start_pos, cmd_len, 1000);
