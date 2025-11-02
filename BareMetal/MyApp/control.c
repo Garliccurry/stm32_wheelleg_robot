@@ -145,7 +145,7 @@ void Control_MotionMove(void)
 {
     static uint8_t leggel_cnt = 0;
     if (g_flagFocDate == WLR_Act && g_flagMpuDate == WLR_Act) {
-        // TODO!(oujiali)进行FOC的平衡控制
+        // TODO 进行FOC的平衡控制
         // 1. 更新磁编码器、陀螺仪数据
         // 2. 设置相位、电压，输出foc
         // 3. 计算平衡的pid数据

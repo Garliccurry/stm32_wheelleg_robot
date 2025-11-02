@@ -356,7 +356,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
     if (htim->Instance == TIM1) {
         // Control_LeggedBalance();
-        Info_UsTickIncrease(); // TODO(oujiali)时钟有问题
+        Info_UsTickIncrease();
     }
 }
 
