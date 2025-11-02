@@ -131,12 +131,15 @@ void MPU6050_Init(void)
     float gyroX = 0, gyroY = 0, gyroZ = 0;
     HAL_Delay(10);
     ret |= MPU6050_GyroOffsetCalibrate(&gyroX, &gyroY, &gyroZ, MPU6050_GYRO_INIT_COUNT);
-    g_MPUdata.gyroXoffset = gyroX;
-    g_MPUdata.gyroYoffset = gyroY;
-    g_MPUdata.gyroZoffset = gyroZ;
-    LOG_INFO("mpu6050 Gyro offset X:%f, Y:%f, Z:%f", g_MPUdata.gyroXoffset, g_MPUdata.gyroYoffset, g_MPUdata.gyroZoffset);
-    g_MPUdata.accCoef = MPU6050_ACC_COEF;
-    g_MPUdata.gyroCoef = MPU6050_GYRO_COEF;
+
+    MpuData_t *MPUdata = Info_GetMpuData();
+
+    MPUdata->gyroXoffset = gyroX;
+    MPUdata->gyroYoffset = gyroY;
+    MPUdata->gyroZoffset = gyroZ;
+    LOG_INFO("mpu6050 Gyro offset X:%f, Y:%f, Z:%f", gyroX, gyroY, gyroZ);
+    MPUdata->accCoef = MPU6050_ACC_COEF;
+    MPUdata->gyroCoef = MPU6050_GYRO_COEF;
     if (ret == WLR_OK) {
         LOG_INFO("mpu6050 initialization successful!");
     } else {

@@ -4,7 +4,6 @@
 /**********************    INCLUDE DIRECTIVES    ***********************/
 #include "main.h"
 #include "device.h"
-#include "info.h"
 /**************    CONSTANTS, MACROS, & DATA STRUCTURES    ***************/
 #define AS5600_I2C_DATASIZE 2
 #define AS5600_ADDRESS      0x6C
@@ -22,6 +21,18 @@ typedef enum {
     AS5600Right,
     AS5600DirBottom
 } AS5600Dir;
+
+typedef struct
+{
+    float    angle_pre;
+    float    rotat_pre;
+    uint32_t angle_pre_us_ts;
+    float    angle_get_vel;
+    float    rotat_get_vel;
+    uint32_t angle_get_vel_us_ts;
+    float    shaft_vel;
+} AsData_t;
+
 /***********************    FUNCTION PROTOTYPES    ***********************/
 I2cDevice_t      *AS5600_GetHandle(AS5600Dir dir);
 void              AS5600_Init(void);

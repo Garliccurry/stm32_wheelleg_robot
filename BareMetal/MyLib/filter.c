@@ -29,7 +29,7 @@ float Filter_LpfControl(LPF_TypeDef *lpf, float input)
     }
 
     float alpha = lpf->TimeConstant / (lpf->TimeConstant + dt);
-    float output = alpha * input + (1.f - alpha) * lpf->output_prev;
+    float output = (1.f - alpha) * input + alpha * lpf->output_prev;
     lpf->us_ts = Info_GetUsTick();
     lpf->output_prev = output;
     return output;
@@ -38,11 +38,8 @@ float Filter_LpfControl(LPF_TypeDef *lpf, float input)
 void Filter_Init(void)
 {
     uint32_t   ret = WLR_OK;
-    FilterSet *lpfSet = NULL;
+    FilterSet *lpfSet = Info_GetFilterSet();
     do {
-        lpfSet = &g_lpfSet;
-        BREAK_IF(lpfSet == NULL, WLR_ERR65543);
-
         lpfSet->roll = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
         BREAK_IF(lpfSet->roll == NULL, WLR_ERR65540);
 
@@ -63,6 +60,9 @@ void Filter_Init(void)
 
         lpfSet->vel_shaftR = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
         BREAK_IF(lpfSet->vel_shaftR == NULL, WLR_ERR65540);
+
+        lpfSet->gyroY = (LPF_TypeDef *)malloc(sizeof(LPF_TypeDef));
+        BREAK_IF(lpfSet->gyroY == NULL, WLR_ERR65540);
     } while (false);
 
     if (ret != WLR_OK) {
@@ -76,5 +76,6 @@ void Filter_Init(void)
     Filter_SetUp(lpfSet->ang_shaftR, 0, 0);
     Filter_SetUp(lpfSet->vel_shaftL, 0, FILTER_TF_VEL);
     Filter_SetUp(lpfSet->vel_shaftR, 0, FILTER_TF_VEL);
+    Filter_SetUp(lpfSet->gyroY, 0, FILTER_TF_GYRO_Y);
     LOG_INFO("LowPassFilter initial succ");
 }

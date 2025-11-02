@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "filter.h"
 #include "pid.h"
+#include "driver_as5600.h"
 
 #define WLR_OK    0
 #define WLR_ERROR 1
@@ -17,6 +18,10 @@
 #define MPU_BUF_LEN 5
 
 #define PI 3.1415926
+
+#define RX_BUF_SIZE  128U
+#define RX_THRESHOLD 2U
+#define TX_BUF_SIZE  256U
 /**************    CONSTANTS, MACROS, & DATA STRUCTURES    ***************/
 
 typedef struct {
@@ -46,21 +51,11 @@ typedef struct
     float    angleX;
     float    angleY;
     float    angleZ;
+    float    angleY_zeropoint;
     float    gyroCoef;
     float    accCoef;
     uint32_t us_ts;
 } MpuData_t;
-
-typedef struct
-{
-    float    angle_pre;
-    float    rotat_pre;
-    uint32_t angle_pre_us_ts;
-    float    angle_get_vel;
-    float    rotat_get_vel;
-    uint32_t angle_get_vel_us_ts;
-    float    shaft_vel;
-} AsData_t;
 
 typedef struct
 {
@@ -69,6 +64,12 @@ typedef struct
     uint16_t time[2];
     uint16_t speed[2];
 } SCSData_t;
+
+typedef struct
+{
+    uint8_t buff[RX_BUF_SIZE];
+    uint8_t size;
+} Command_t;
 
 typedef enum {
     WLR_Idle = 0,
@@ -92,9 +93,12 @@ typedef enum {
     WLR_ERR65541,        // MPU6050 initial data timeout
     WLR_ERR65542,        // AS5600 initial data timeout
     WLR_ERR65543,        // empty point fail
+    WLR_ERR65544,        // vailed char convert to float
 } WLR_ErrorCode;
 
-extern uint8_t g_flagUsartRec;
+extern uint8_t g_flagUart1Recv;
+extern uint8_t g_flagUart1Send;
+extern uint8_t g_flagUart1Prefix;
 extern uint8_t g_flagFatalErr;
 extern uint8_t g_flagI2cError;
 extern uint8_t g_flagUart2Bus;
@@ -104,21 +108,19 @@ extern uint8_t g_flagMpuDate;
 
 extern uint32_t g_I2cErrorCount;
 
-extern float g_Voltage;
-
-extern AsData_t  g_ASdataL;
-extern AsData_t  g_ASdataR;
-extern MpuData_t g_MPUdata;
-
-extern FilterSet g_lpfSet;
-extern PIDSet    g_pidSet;
-
 /***********************    FUNCTION PROTOTYPES    ***********************/
 
-void Info_TimerCallback(void);
+void Info_TimerCallbackBattery(void);
+void Info_TimerCallbackFatal(void);
 void Info_ProcessAffair(void);
 
 void     Info_UsTickIncrease(void);
 uint32_t Info_GetUsTick(void);
 void     Info_Init(void);
+
+AsData_t  *Info_GetAsData(AS5600Dir dir);
+MpuData_t *Info_GetMpuData(void);
+FilterSet *Info_GetFilterSet(void);
+PIDSet    *Info_GetPidSet(void);
+Command_t *Info_GetUsartCommand(void);
 #endif

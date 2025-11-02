@@ -102,25 +102,24 @@ void Sensor_GetFocData(void)
         shaft_angle_L = AS5600_GetAngFromRaw(shaft_raw_angle_L);
         shaft_angle_R = AS5600_GetAngFromRaw(shaft_raw_angle_R);
 
-        AS5600_AngleUpdate(&g_ASdataL, shaft_angle_L);
-        AS5600_AngleUpdate(&g_ASdataR, shaft_angle_R);
+        AsData_t *ASdataL = Info_GetAsData(AS5600Left);
+        AsData_t *ASdataR = Info_GetAsData(AS5600Right);
+        AS5600_AngleUpdate(ASdataL, shaft_angle_L);
+        AS5600_AngleUpdate(ASdataR, shaft_angle_R);
 
-        AS5600_GetVel(&g_ASdataL);
-        AS5600_GetVel(&g_ASdataR);
+        AS5600_GetVel(ASdataL);
+        AS5600_GetVel(ASdataR);
         g_flagFocDate = WLR_Act;
-        // if (i % 100 == 99) {
-        //     printf("%f\r\n", g_ASdataL.shaft_vel);
-        // }
-        // i++;
     }
 }
 
 void Sensor_GetMpuData(void)
 {
     static MpuRawData_t rawdata;
+
+    MpuData_t *MPUdata = Info_GetMpuData();
     if (CirBuf_MpuDataRead(&g_CirMpuRawBuff, &rawdata) == WLR_OK) {
-        MPU6050_GetData(&g_MPUdata, rawdata.data);
-        // LOG_DEBUG("%f,%f,%f", g_MPUdata.accX, g_MPUdata.accY, g_MPUdata.accZ);
+        MPU6050_GetData(MPUdata, rawdata.data);
         g_flagMpuDate = WLR_Act;
     }
 }
@@ -138,6 +137,4 @@ void Sensor_Init(void)
 
     AS5600_Init();
     MPU6050_Init();
-
-    HAL_TIM_Base_Start_IT(&htim2);
 }

@@ -6,14 +6,31 @@ static logOutputFunc g_log_output = NULL;
 
 static void Get_SystemTime(char *time_buf, uint16_t buf_size, uint16_t *ms);
 
-void Log_RegisterOutput(logOutputFunc func)
+static void Log_RegisterOutput(logOutputFunc func)
 {
-    g_log_output = func ? func : Usart_LogPrint;
+    g_log_output = func ? func : Usart_NorLogPrint;
 }
 
-void Log_SetFormat(uint32_t format)
+static void Log_SetFormat(uint32_t format)
 {
     g_log_format = format;
+}
+
+static void Log_SetLevel(uint32_t level)
+{
+    g_log_level = level;
+}
+
+void Log_Init(void)
+{
+    Log_SetLevel(CONFIG_LOG_DEF_LEVEL);
+    Log_SetFormat(LOG_FMT_LEVEL_STR);
+    if (g_flagUart1Prefix != WLR_Off) {
+        Log_RegisterOutput(Usart_NorLogPrint);
+    } else {
+        Log_RegisterOutput(Usart_DmaLogPrint);
+    }
+    g_flagUart1Send = WLR_Idle;
 }
 
 static void Get_SystemTime(char *time_buf, uint16_t buf_size, uint16_t *ms)
@@ -40,7 +57,7 @@ void Log_Print(uint32_t level, const char *func, uint32_t line, const char *form
     int     idx = 0;
 
     if (g_log_format & LOG_FMT_LEVEL_STR) {
-        static const char *level_str[] = {"DEBUG", "INFO ", "ERROR"};
+        static const char *level_str[] = {"DEBUG", "INFO ", "WARN", "ERROR"};
         idx += snprintf(log_buf + idx, sizeof(log_buf) - idx, "[%s]", level_str[level]);
     }
 

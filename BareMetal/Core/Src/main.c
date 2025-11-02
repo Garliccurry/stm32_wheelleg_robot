@@ -30,6 +30,7 @@
 #include "battery.h"
 #include "log.h"
 #include "foc.h"
+#include "order.h"
 #include "sensor.h"
 #include "control.h"
 #include "softtimer.h"
@@ -109,10 +110,8 @@ int main(void)
     MX_TIM1_Init();
     /* USER CODE BEGIN 2 */
 
-    Log_RegisterOutput(Usart_LogPrint);
-    Log_SetFormat(0);
-
-    HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff, RX_BUF_SIZE);
+    Order_Init();
+    Log_Init();
 
     HAL_Delay(1000);
     PID_Init();
@@ -121,6 +120,7 @@ int main(void)
     Control_Init();
     SoftwareTimer_Init();
     Info_Init();
+    HAL_TIM_Base_Start_IT(&htim2);
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -129,7 +129,9 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        Uart_ParseCommand();
+
+        SoftwareTimer_Update();
+        Order_ParseCommand();
         Sensor_GetMpuData();
         Sensor_GetFocData();
         Control_MotionMove();

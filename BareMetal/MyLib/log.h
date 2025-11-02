@@ -9,7 +9,7 @@
 #include <string.h>
 
 /* 配置宏定义 */
-#define CONFIG_LOG_BUF_SIZE  256u
+#define CONFIG_LOG_BUF_SIZE  TX_BUF_SIZE
 #define CONFIG_LOG_DEF_LEVEL LOG_LEVEL_DEBUG
 #define LOG_NEWLINE_SIGN     "\r\n" // STM32串口常用换行符
 
@@ -17,6 +17,7 @@
 typedef enum {
     LOG_LEVEL_DEBUG = 0,
     LOG_LEVEL_INFO,
+    LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR,
     LOG_LEVEL_BOTTOM
 } log_level_t;
@@ -30,6 +31,7 @@ typedef enum {
 /* 启用日志级别开关 */
 #define LOG_DEBUG_EN 1
 #define LOG_INFO_EN  1
+#define LOG_WARN_EN  1
 #define LOG_ERROR_EN 1
 
 /* 日志宏定义 */
@@ -46,6 +48,12 @@ typedef enum {
 #define LOG_INFO(fmt, ...)
 #endif
 
+#if LOG_WARN_EN
+#define LOG_WARN(fmt, ...) Log_Print(LOG_LEVEL_WARN, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#else
+#define LOG_WARN(fmt, ...)
+#endif
+
 #if LOG_ERROR_EN
 #define LOG_ERROR(fmt, ...) Log_Print(LOG_LEVEL_ERROR, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
@@ -55,7 +63,6 @@ typedef enum {
 /* 日志输出函数类型 */
 typedef void (*logOutputFunc)(uint8_t *data, uint16_t size);
 
-void Log_RegisterOutput(logOutputFunc func);
-void Log_SetFormat(uint32_t fmt);
+void Log_Init(void);
 void Log_Print(uint32_t level, const char *func, uint32_t line, const char *fmt, ...);
 #endif

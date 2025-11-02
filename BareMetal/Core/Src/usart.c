@@ -26,6 +26,7 @@
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef  hdma_usart1_tx;
 DMA_HandleTypeDef  hdma_usart2_rx;
 DMA_HandleTypeDef  hdma_usart2_tx;
 
@@ -103,6 +104,24 @@ void HAL_UART_MspInit(UART_HandleTypeDef *uartHandle)
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
         GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+        /* USART1 DMA Init */
+        /* USART1_TX Init */
+        hdma_usart1_tx.Instance = DMA2_Stream7;
+        hdma_usart1_tx.Init.Channel = DMA_CHANNEL_4;
+        hdma_usart1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+        hdma_usart1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+        hdma_usart1_tx.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_usart1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        hdma_usart1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+        hdma_usart1_tx.Init.Mode = DMA_NORMAL;
+        hdma_usart1_tx.Init.Priority = DMA_PRIORITY_LOW;
+        hdma_usart1_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        if (HAL_DMA_Init(&hdma_usart1_tx) != HAL_OK) {
+            Error_Handler();
+        }
+
+        __HAL_LINKDMA(uartHandle, hdmatx, hdma_usart1_tx);
 
         /* USART1 interrupt Init */
         HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
@@ -188,6 +207,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
         */
         HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9 | GPIO_PIN_10);
 
+        /* USART1 DMA DeInit */
+        HAL_DMA_DeInit(uartHandle->hdmatx);
+
         /* USART1 interrupt Deinit */
         HAL_NVIC_DisableIRQ(USART1_IRQn);
         /* USER CODE BEGIN USART1_MspDeInit 1 */
@@ -221,8 +243,11 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *uartHandle)
 /* USER CODE BEGIN 1 */
 #include "foc.h"
 #include "log.h"
-uint8_t        gRxBuff[RX_BUF_SIZE];
-static uint8_t gCommand[RX_BUF_SIZE];
+#include "order.h"
+#include "esp8266.h"
+uint8_t gRxBuff[2][RX_BUF_SIZE];
+uint8_t gTxBuff[TX_BUF_SIZE];
+uint8_t gRxIdx = 0;
 #ifdef __GNUC__
 /* With GCC, small printf (option LD Linker->Libraries->Small printf
    set to 'Yes') calls __io_putchar() */
@@ -249,21 +274,35 @@ int _write(int file, char *ptr, int len)
 }
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-    LOG_ERROR("USART ERR: %d", huart->ErrorCode);
+    uint32_t error_code = huart->ErrorCode;
+    if (error_code & HAL_UART_ERROR_NE) {
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_NE);
+    }
+    if (error_code & HAL_UART_ERROR_FE) {
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_FE);
+    }
+    if (error_code & HAL_UART_ERROR_ORE) {
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_ORE);
+    }
+    HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff[gRxIdx], RX_BUF_SIZE);
+    gRxIdx = (gRxIdx == 0) ? 1 : 0;
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
     if (huart->Instance == USART1) {
-        if (Size == RX_BUF_SIZE) {
-            for (int i = 0; i < RX_BUF_SIZE; i++) {
-                gCommand[i] = gRxBuff[i];
-            }
-            g_flagUsartRec = WLR_Act;
-        }
-        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff, RX_BUF_SIZE);
+        uint8_t next_rx_idx = (gRxIdx == 0) ? 1 : 0;
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_NE | UART_FLAG_FE | UART_FLAG_ORE);
+        HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_IT(huart, gRxBuff[next_rx_idx], RX_BUF_SIZE);
         if (status != HAL_OK) {
             LOG_ERROR("UASRT1 recieve error, ret:%d", status);
+        }
+        if (Size >= RX_THRESHOLD) {
+            Command_t *command = Info_GetUsartCommand();
+            memcpy(command->buff, gRxBuff[gRxIdx], Size);
+            gRxIdx = next_rx_idx;
+            command->size = Size;
+            g_flagUart1Recv = WLR_Act;
         }
     }
 }
@@ -271,54 +310,34 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART1) {
-        // return;
+        g_flagUart1Send = WLR_Idle;
     } else if (huart->Instance == USART2) {
         g_flagUart2Bus = WLR_UsartIdle;
     }
 }
 
-void Usart_LogPrint(uint8_t *ch, uint16_t len)
+void Usart_NorLogPrint(uint8_t *ch, uint16_t len)
 {
+    if (g_flagUart1Prefix != WLR_Off) {
+        if (ESP8266_ServerPresend(len) != WLR_OK) {
+            g_flagFatalErr = WLR_On;
+        }
+    }
     HAL_UART_Transmit(&huart1, ch, len, 10000);
 }
 
-int  g_speed = 0;
-void Uart_ParseCommand(void)
+void Usart_DmaLogPrint(uint8_t *ch, uint16_t len)
 {
-    if (g_flagUsartRec == WLR_Act) {
-        // if (gCommand[0] == 0x31) {
-        //     pos_left += 6;
-        // } else if (gCommand[3] == 0x32) {
-        //     g_vel += 10.f;
-        //     printf("%f\r\n", g_vel);
-        // } else if (gCommand[3] == 0x33) {
-        //     g_vel -= 10.f;
-        //     printf("%f\r\n", g_vel);
-        // } else if (gCommand[3] == 0x34) {
-        //     g_hight += 10;
-        //     printf("%d\r\n", g_hight);
-        // } else if (gCommand[3] == 0x35) {
-        //     g_hight -= 10;
-        //     printf("%d\r\n", g_hight);
-        // } else if (gCommand[3] == 0x36) {
-        //     wheel_run = ~wheel_run;
-        //     MOTOR_L_TOGGLE;
-        //     MOTOR_R_TOGGLE;
-        // }
-        switch (gCommand[3]) {
-        case '1':
-            g_speed += 1;
-            LOG_DEBUG("INC SPEED +: %f", g_speed);
-            break;
-        case '2':
-            g_speed -= 1;
-            LOG_DEBUG("DEC SPEED -: %f", g_speed);
-            break;
-        default:
-            break;
-        }
-        g_flagUsartRec = WLR_Idle;
-    }
+    // uint32_t timestramp = HAL_GetTick();
+    // while (g_flagUart1Send == WLR_Act) {
+    //     if (HAL_GetTick() - timestramp > 10000) {
+    //         return;
+    //     }
+    // }
+    RET_IF(g_flagUart1Send == WLR_Act);
+    memcpy(gTxBuff, ch, len);
+    g_flagUart1Send = WLR_Act;
+    HAL_UART_Transmit_DMA(&huart1, gTxBuff, len);
 }
 
 void FTUart_Send(uint8_t *nDat, int nLen)
@@ -352,5 +371,10 @@ uint32_t FTBus_Delay(void)
         }
     }
     return WLR_OK;
+}
+
+void Usart_StartRecvByIdle(void)
+{
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, gRxBuff[gRxIdx], RX_BUF_SIZE);
 }
 /* USER CODE END 1 */

@@ -12,14 +12,13 @@ static float NormalizeAngle(float ele_angle)
 
 static float Closeloop_ElecAngle(Motor_TypeDef *m, float angle)
 {
-    return NormalizeAngle((float)(m->sDIR * m->PP) * angle - (m->Z_ElecAngle));
+    return NormalizeAngle((float)(m->sDIR * m->PP) * angle - (m->Z_ElecAngle)); // TODO(oujiali)运行一段时间后，同样倾斜角度两轮转速不一致，貌似是此处Z_ElecAngle导致的
 }
 
-static void FOC_AlignSensor(Motor_TypeDef *m, float PP, float sDIR, float mDIR, float Vpwr)
+static void FOC_AlignSensor(Motor_TypeDef *m, float PP, float sDIR, float Vpwr)
 {
     m->PP = PP;
     m->sDIR = sDIR;
-    m->mDIR = mDIR;
     m->Vpwr = Vpwr;
     m->Z_ElecAngle = 0;
 }
@@ -79,8 +78,7 @@ void FOC_VelocityCloseloop(Motor_TypeDef *m, float target_v, float angle, float 
 
 void FOC_WheelBalance(Motor_TypeDef *m, float target, float angle)
 {
-    float m_target = (m->mDIR >= 0) ? target : -target;
-    SetTorque(m, m_target, Closeloop_ElecAngle(m, angle));
+    SetTorque(m, target, Closeloop_ElecAngle(m, angle));
 }
 
 void FOC_PositionCloseloop(Motor_TypeDef *m, float motor_target, float angle, float rotation)
@@ -109,6 +107,40 @@ void FOC_VelocityOpenLoop(Motor_TypeDef *m, float target_v)
 }
 #endif
 
+static uint32_t FOC_ZoreAngleInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R)
+{
+    uint32_t status = HAL_OK;
+    SetTorque(m_L, m_L->Vpwr, -_3PI_2);
+    SetTorque(m_R, m_R->Vpwr, _3PI_2);
+    HAL_Delay(1000);
+
+    uint8_t  asrawdataL[AS5600_I2C_DATASIZE] = {0}, asrawdataR[AS5600_I2C_DATASIZE] = {0};
+    uint16_t asu16dataL, asu16dataR;
+    float    angleL = 0;
+    float    angleR = 0;
+    for (uint32_t i = 0; i < 3000; i++) {
+        uint32_t timestramp = HAL_GetTick();
+        while (HAL_I2C_GetState(m_L->as_dev->hi2c) != HAL_I2C_STATE_READY || HAL_I2C_GetState(m_R->as_dev->hi2c) != HAL_I2C_STATE_READY) {
+            RET_IF(HAL_GetTick() - timestramp > 1000, WLR_ERROR);
+        }
+        status |= AS5600_NorReadData(m_L->as_dev, asrawdataL);
+        status |= AS5600_NorReadData(m_R->as_dev, asrawdataR);
+        asu16dataL = (uint16_t)asrawdataL[0] << 8 | asrawdataL[1];
+        asu16dataR = (uint16_t)asrawdataR[0] << 8 | asrawdataR[1];
+        angleL += AS5600_GetAngFromRaw(asu16dataL);
+        angleR += AS5600_GetAngFromRaw(asu16dataR);
+    }
+    angleL = angleL / 3000;
+    angleR = angleR / 3000;
+    m_L->Z_ElecAngle = Closeloop_ElecAngle(m_L, angleL);
+    m_R->Z_ElecAngle = Closeloop_ElecAngle(m_R, angleR);
+
+    SetTorque(m_L, 0, 0);
+    SetTorque(m_R, 0, 0);
+    HAL_Delay(100);
+    return status;
+}
+
 void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
                    TIM_HandleTypeDef *htim_L,
                    TIM_HandleTypeDef *htim_R)
@@ -120,13 +152,13 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
     m_L->htim = htim_L;
     m_R->htim = htim_R;
 
-    FOC_AlignSensor(m_L, FOC_POLE_PAIRS, FOC_SENSOR_DIR_L, FOC_MOTOR_DIR_L, FOC_VOLT_POWER);
-    FOC_AlignSensor(m_R, FOC_POLE_PAIRS, FOC_SENSOR_DIR_R, FOC_MOTOR_DIR_R, FOC_VOLT_POWER);
+    FOC_AlignSensor(m_L, FOC_POLE_PAIRS, FOC_SENSOR_DIR_L, FOC_VOLT_POWER);
+    FOC_AlignSensor(m_R, FOC_POLE_PAIRS, FOC_SENSOR_DIR_R, FOC_VOLT_POWER);
 
     m_L->as_dev = AS5600_GetHandle(AS5600Left);
     m_R->as_dev = AS5600_GetHandle(AS5600Right);
 
-    HAL_StatusTypeDef status = HAL_OK;
+    uint32_t status = HAL_OK;
 
     MOTOR_L_ENABLE;
     MOTOR_R_ENABLE;
@@ -138,28 +170,7 @@ void FOC_MoterInit(Motor_TypeDef *m_L, Motor_TypeDef *m_R,
     status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_2);
     status |= HAL_TIM_PWM_Start(htim_R, TIM_CHANNEL_3);
 
-    SetTorque(m_L, m_L->Vpwr, _3PI_2);
-    SetTorque(m_R, m_R->Vpwr, _3PI_2);
-    HAL_Delay(100);
-
-    LOG_DEBUG("Left Zero ele angle ret:%d", status);
-    uint8_t  asrawdataL[AS5600_I2C_DATASIZE] = {0}, asrawdataR[AS5600_I2C_DATASIZE] = {0};
-    uint16_t asu16dataL, asu16dataR;
-    status |= AS5600_NorReadData(m_L->as_dev, asrawdataL);
-    status |= AS5600_NorReadData(m_R->as_dev, asrawdataR);
-    asu16dataL = (uint16_t)asrawdataL[0] << 8 | asrawdataL[1];
-    asu16dataR = (uint16_t)asrawdataR[0] << 8 | asrawdataR[1];
-    float angleL = AS5600_GetAngFromRaw(asu16dataL);
-    float angleR = AS5600_GetAngFromRaw(asu16dataR);
-    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
-    m_L->Z_ElecAngle = Closeloop_ElecAngle(m_L, angleL);
-    m_R->Z_ElecAngle = Closeloop_ElecAngle(m_R, angleR);
-    LOG_DEBUG("Left Zero ele angle:%f,%f", m_L->Z_ElecAngle, angleL);
-
-    SetTorque(m_L, 0, 0);
-    SetTorque(m_R, 0, 0);
-    HAL_Delay(100);
-
+    status |= FOC_ZoreAngleInit(m_L, m_R);
     if (status != HAL_OK) {
         LOG_INFO("FOC initialization failed, ret: %d", status);
     } else {
